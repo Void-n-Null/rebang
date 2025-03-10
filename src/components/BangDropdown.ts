@@ -198,7 +198,7 @@ export class BangDropdown {
         if (prevIndex >= 0 && prevIndex !== index && prevIndex < this.filteredBangs.length) {
           const items = this.container?.querySelector('.overflow-y-auto')?.querySelectorAll('.cursor-pointer');
           if (items && prevIndex < items.length) {
-            items[prevIndex].classList.remove('bg-[#3a0082]/80');
+            //items[prevIndex].classList.remove('bg-[#3a0082]/80');
             items[prevIndex].classList.remove('border-l-4');
             items[prevIndex].classList.remove('border-[#3a86ff]');
             items[prevIndex].classList.remove('pl-1');
@@ -206,7 +206,7 @@ export class BangDropdown {
         }
         
         // Highlight current item
-        bangItem.classList.add('bg-[#3a0082]/80');
+        //bangItem.classList.add('bg-[#3a0082]/80');
       });
       
       // Add mouseleave handler to handle hover state properly
@@ -220,7 +220,7 @@ export class BangDropdown {
           if (this.selectedIndex === currentIndex) {
             // If selectedIndex is still the same, we're not navigating with keyboard
             // So we can remove the highlight and reset selectedIndex
-            bangItem.classList.remove('bg-[#3a0082]/80');
+            //bangItem.classList.remove('bg-[#3a0082]/80');
             this.selectedIndex = -1;
           }
         }, 50);
@@ -236,10 +236,10 @@ export class BangDropdown {
   public hide(): void {
     if (this.container) {
       // Clear all highlights before hiding
-      const highlightedItems = this.container.querySelectorAll('.bg-[#3a0082]/80');
+      /*const highlightedItems = this.container.querySelectorAll('.bg-[#3a0082]/80');
       highlightedItems.forEach(item => {
         item.classList.remove('bg-[#3a0082]/80');
-      });
+      });*/
       
       // Clear all border styles
       const borderedItems = this.container.querySelectorAll('.border-l-4');
@@ -292,7 +292,7 @@ export class BangDropdown {
     
     // Clear all highlights and custom styles first
     items.forEach(item => {
-      item.classList.remove('bg-[#3a0082]/80');
+      //item.classList.remove('bg-[#3a0082]/80');
       item.classList.remove('border-l-4');
       item.classList.remove('border-[#3a86ff]');
       item.classList.remove('pl-1'); // Remove extra padding
@@ -300,7 +300,7 @@ export class BangDropdown {
     
     // Highlight new item with a more prominent color and border to override hover effect
     const selectedItem = items[newIndex] as HTMLElement;
-    selectedItem.classList.add('bg-[#3a0082]/80');
+    //selectedItem.classList.add('bg-[#3a0082]/80');
     selectedItem.classList.add('border-l-4');
     selectedItem.classList.add('border-[#3a86ff]');
     selectedItem.classList.add('pl-1');
