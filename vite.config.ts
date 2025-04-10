@@ -6,10 +6,6 @@ export default defineConfig({
     VitePWA({
       // registerType: "autoUpdate",
             // registerType: "autoUpdate", // Keep this commented out
-            devOptions: {
-        enabled: true, // Explicitly enable PWA features in development
-        type: 'module', // Recommended type for modern browsers
-      },
       // Add manifest options
       manifest: {
         name: 'ReBang', // Replace with your actual app name if different
