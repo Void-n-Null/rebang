@@ -39,32 +39,33 @@ export class MainModal extends BaseModal {
             style: 'opacity: 0;'
         });
         
-        // Create modal
+        // Create modal - Make it a flex column
         this.modal = createElement('div', {
-            className: `bg-[#120821] border border-white/10 rounded-lg shadow-xl w-full max-w-${this.config.maxWidth} overflow-hidden transition-transform duration-300`,
+            className: `bg-[#120821] border border-white/10 rounded-lg shadow-xl w-full max-w-${this.config.maxWidth} flex flex-col max-h-[95vh] transition-transform duration-300`,
             style: 'transform: translateY(20px);'
         });
         
-        // Create error message container (initially hidden)
+        // Create error message container
         this.errorMessageElement = createElement('div', {
-            className: 'hidden bg-red-500/20 border border-red-500/40 text-white px-4 py-3 mb-4 rounded',
+            className: 'hidden bg-red-500/20 border border-red-500/40 text-white px-4 py-3 rounded flex-shrink-0',
             style: 'margin: 0 1rem; display: none;'
         });
         
-        // Create modal header
+        // Create modal header - Ensure it doesn't shrink
         this.headerElement = this.createHeader();
+        this.headerElement.classList.add('flex-shrink-0');
         
-        // Create content container
+        // Create content container - Make it grow and scroll
         this.contentElement = createElement('div', {
-            className: 'px-6 py-6'
+            className: 'flex-grow overflow-y-auto min-h-0'
         });
         
-        // Create footer container
+        // Create footer container - Ensure it doesn't shrink
         this.footerElement = createElement('div', {
-            className: 'bg-black/30 px-6 py-4 flex justify-end gap-2'
+            className: 'bg-black/30 px-6 py-4 flex justify-end gap-2 flex-shrink-0'
         });
         
-        // Assemble modal
+        // Assemble modal using the flex layout
         this.modal.append(this.headerElement, this.errorMessageElement, this.contentElement, this.footerElement);
         this.overlay.appendChild(this.modal);
         
@@ -123,7 +124,9 @@ export class MainModal extends BaseModal {
             this.contentElement.removeChild(this.contentElement.firstChild);
         }
         
-        // Add new content
+        // Add new content - The element passed here (our contentWrapper from BangFormModal)
+        // should now correctly fill the flex-grow space and handle its internal layout.
+        // It might need its own padding now since we removed it from contentElement.
         this.contentElement.appendChild(element);
     }
     

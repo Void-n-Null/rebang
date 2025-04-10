@@ -94,7 +94,7 @@ export class BangFormModal extends MainModal {
     
     // Wrapper for error message and scrollable form content
     const contentWrapper = createElement('div', {
-        className: 'flex flex-col overflow-hidden' // Stacks children vertically, prevents its own overflow
+        className: 'flex flex-col overflow-hidden h-full min-h-0'
     });
     contentWrapper.append(this.errorMessage, formContent); // Error message first, then scrollable form
     
