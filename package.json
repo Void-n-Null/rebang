@@ -21,6 +21,7 @@
     "@vercel/speed-insights": "^1.2.0",
     "eslint": "^9.22.0",
     "query-string": "^9.1.1",
-    "vite-plugin-pwa": "^0.21.1"
+    "vite-plugin-pwa": "^0.21.1",
+    "workbox-window": "^7.3.0"
   }
 }
