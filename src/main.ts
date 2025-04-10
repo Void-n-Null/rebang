@@ -4,6 +4,7 @@ import { performRedirect } from "./utils/redirect";
 import { inject } from "@vercel/analytics";
 import { injectSpeedInsights } from "@vercel/speed-insights";
 import { bangWorker } from "./utils/workerUtils";
+import { registerSW } from 'virtual:pwa-register';
 
 /**
  * Main function to initialize the application
@@ -11,6 +12,20 @@ import { bangWorker } from "./utils/workerUtils";
 function main(): void {
   inject();
   injectSpeedInsights();
+  
+  // Added PWA registration and update handling
+  const updateSW = registerSW({
+    onNeedRefresh() {
+      // TODO: Basic confirm dialog - replace with better UI 
+      if (confirm("New content available, reload?")) {
+        updateSW(true);
+      }
+    },
+    onOfflineReady() {
+      console.log("App is ready to work offline");
+      // TODO: Show a toast or notification
+    },
+  });
   
   // Initialize web worker early to speed up first search
   bangWorker.init();
