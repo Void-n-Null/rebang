@@ -80,25 +80,26 @@ export class BangFormModal extends MainModal {
     // Call parent method to create the basic modal structure
     super.createModal();
     
-    // Create form
-    const form = this.createBangForm();
-    
-    // Create error message container (initially hidden)
+    // Error message container - ensure it doesn't get squished
     this.errorMessage = createElement('div', {
-      className: 'bg-red-500/20 border border-red-500/40 text-white px-4 py-3 mb-4 rounded',
+      className: 'bg-red-500/20 border border-red-500/40 text-white px-4 py-3 mb-4 rounded flex-shrink-0',
       style: 'display: none;'
     });
     
-    // Create content container
-    const content = createElement('div', {
-      className: 'px-8 py-6'
+    // Scrollable content container for the form
+    const formContent = createElement('div', {
+      className: 'px-8 py-6 overflow-y-auto flex-grow' // This div will scroll
     });
+    formContent.append(this.createBangForm()); // Put the form inside
     
-    // Add error message and form to content
-    content.append(this.errorMessage, form);
+    // Wrapper for error message and scrollable form content
+    const contentWrapper = createElement('div', {
+        className: 'flex flex-col overflow-hidden' // Stacks children vertically, prevents its own overflow
+    });
+    contentWrapper.append(this.errorMessage, formContent); // Error message first, then scrollable form
     
-    // Set the content
-    this.setContent(content);
+    // Set the wrapper as the main content for the modal
+    this.setContent(contentWrapper);
     
     // Set footer buttons
     this.setFooterButtons([
