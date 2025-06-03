@@ -26,9 +26,12 @@ export class CustomBangModal extends MainModal {
     
     this.settings = loadSettings();
     this.onSettingsChange = onSettingsChange;
-    this.bangFormModal = new BangFormModal((bang: BangItem | null, isEdit: boolean) => {
-      this.handleBangSave(bang, isEdit);
-    });
+    // Update the callback signature for BangFormModal constructor
+    this.bangFormModal = new BangFormModal(
+      (updatedBang: BangItem | null, originalBangFromForm: BangItem | null, isEdit: boolean) => {
+        this.handleBangSave(updatedBang, originalBangFromForm, isEdit);
+      }
+    );
   }
 
   /**
@@ -209,36 +212,58 @@ export class CustomBangModal extends MainModal {
   /**
    * Handles saving a new or edited bang
    */
-  private handleBangSave(bang: BangItem | null, isEdit: boolean): void {
-    if (!bang) return;
-    
-    // Ensure customBangs array exists
+  private handleBangSave(updatedBang: BangItem | null, originalBangFromForm: BangItem | null, isEdit: boolean): void {
+    if (!updatedBang) return;
+
     if (!this.settings.customBangs) {
       this.settings.customBangs = [];
     }
-    
-    if (isEdit) {
-      // Update existing bang
-      // Original bang might use either string or array for t, so we need a more flexible way to find it
-      if (this.pendingDeleteBang) {
-        const originalTriggersArray = Array.isArray(this.pendingDeleteBang.t) 
-          ? this.pendingDeleteBang.t 
-          : [this.pendingDeleteBang.t];
-          
-        // Find the index by comparing with originalBang
-        const index = this.settings.customBangs.findIndex(b => 
-          b.s === this.pendingDeleteBang?.s && 
-          b.d === this.pendingDeleteBang?.d);
-        
-        if (index >= 0) {
-          this.settings.customBangs[index] = bang;
-        }
+
+    if (isEdit && originalBangFromForm) {
+      // Find the index of the original bang.
+      // The trigger 't' is the primary key and is read-only during edit.
+      const index = this.settings.customBangs.findIndex(existingBang => {
+        // Helper to normalize triggers to an array of strings for comparison
+        const normalizeAndSortTriggers = (trigger: string | string[]): string[] =>
+            (Array.isArray(trigger) ? trigger : [String(trigger)]).sort();
+
+        const originalFormTriggersSorted = normalizeAndSortTriggers(originalBangFromForm.t);
+        const existingTriggersSorted = normalizeAndSortTriggers(existingBang.t);
+
+        // Compare sorted trigger arrays for content equality
+        const triggersMatch = originalFormTriggersSorted.length === existingTriggersSorted.length &&
+                              originalFormTriggersSorted.every((val, idx) => val === existingTriggersSorted[idx]);
+
+        // Also check service and domain for robustness, though unique trigger should be primary.
+        return triggersMatch &&
+               existingBang.s === originalBangFromForm.s &&
+               existingBang.d === originalBangFromForm.d;
+      });
+
+      if (index !== -1) {
+        this.settings.customBangs[index] = updatedBang;
+      } else {
+        console.error(
+          "Error editing bang: Original bang not found in settings. Original from form:",
+          originalBangFromForm,
+          "Current customBangs:",
+          this.settings.customBangs
+        );
+        // Optionally, inform the user about the error.
+        // For now, we'll just log it and not save if the original isn't found to prevent duplicates.
+        this.refreshBangList(); // Refresh to show the user the current (unchanged) state
+        return; // Exit if original not found
       }
-    } else {
+    } else if (!isEdit) {
       // Add new bang
-      this.settings.customBangs.push(bang);
+      this.settings.customBangs.push(updatedBang);
+    } else {
+      // This case (isEdit is true but originalBangFromForm is null) indicates an issue.
+      console.error("Error editing bang: In edit mode but no original bang reference was passed from form.");
+      this.refreshBangList();
+      return; // Exit early
     }
-    
+
     // Save settings and refresh the list
     this.onSettingsChange(this.settings);
     clearBangFilterCache();
