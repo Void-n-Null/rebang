@@ -6,7 +6,7 @@ import { MainModal } from "./MainModal";
  * Modal for adding or editing a bang
  */
 export class BangFormModal extends MainModal {
-  private onSave: (bang: BangItem | null, isEdit: boolean) => void;
+  private onSave: (updatedBang: BangItem | null, originalBang: BangItem | null, isEdit: boolean) => void;
   private isEditMode = false;
   private originalBang: BangItem | null = null;
   private errorMessage: HTMLDivElement | null = null;
@@ -19,7 +19,7 @@ export class BangFormModal extends MainModal {
   private subcategoryInput: HTMLInputElement | null = null;
   private urlPatternInput: HTMLInputElement | null = null;
   
-  constructor(onSave: (bang: BangItem | null, isEdit: boolean) => void) {
+  constructor(onSave: (updatedBang: BangItem | null, originalBang: BangItem | null, isEdit: boolean) => void) {
     super({
       title: 'Add Custom Bang',
       maxWidth: '2xl',
@@ -379,8 +379,8 @@ export class BangFormModal extends MainModal {
     // If subcategory is provided but category is not, use subcategory as category
     if (bang.sc && !bang.c) bang.c = bang.sc;
     
-    // Call the onSave callback
-    this.onSave(bang, this.isEditMode);
+    // Pass this.originalBang (which was set in show()) to the callback
+    this.onSave(bang, this.originalBang, this.isEditMode);
     
     // Close the modal
     this.hide();
