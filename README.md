@@ -32,8 +32,6 @@ An enhanced, feature-rich fork of [unduck](https://github.com/t3dotgg/unduck) th
 
 ## Intelligent Search with Bang Discovery
 
-The search bar on the **!ReBang** home page does more than just accept queries:
-
 * **Bang autocomplete** - Discover new bangs as you type with intelligent suggestions
 * **Visual indicators** - See which bangs are available for your current query
 * **Instant feedback** - Know exactly where you'll be redirected before pressing Enter
@@ -115,7 +113,7 @@ Your custom bangs work just like official ones and will override any official ba
 | Bang Autocomplete | ✅ | ❌ | ✅ |
 | AI-focused Bangs | ❌ | T3 Only | ✅ |
 | Maintained Bang List | Partially | ❌ | ✅ |
-| No White Flash for Dark Mode Users | ❓ | ❌ | ✅ |
+| No White Flash for Dark Mode Users | ❓ | ✅ | ✅ |
 | Curated, Working Bangs | ❌ | ❌ | ✅ |
 | Optimized & Deduplicated | ❌ | ❌ | ✅ |
 
