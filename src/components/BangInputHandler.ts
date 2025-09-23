@@ -48,7 +48,7 @@ export class BangInputHandler {
     // Create the input with padding for the prefix but without backdrop-blur on the input
     this.inputElement = createElement('input', {
       type: 'text',
-      className: 'w-full pl-7 pr-4 py-3 bg-black/20 hover:bg-black/30 placeholder-white/50 rounded-xl border border-white/10 focus:border-[#3a86ff]/50 focus:bg-black/40 focus:outline-none transition-all text-white',
+      className: 'w-full pl-7 pr-4 py-3 bg-black/20 hover:bg-black/30 placeholder-white/50 rounded-xl   focus:outline-none transition-all text-white',
       placeholder: 'Type a bang trigger (e.g., "g" for Google)',
       autocomplete: 'off',
       spellcheck: 'false'
@@ -209,22 +209,19 @@ export class BangInputHandler {
     const inputValue = this.inputElement.value || '';
     const combinedBangs = getCombinedBangsFromSettings();
     
-    // If the input is empty, just update the display but DON'T TOUCH THE INPUT FIELD
+    // If the input is empty, do nothing - keep the current default bang setting
     if (!inputValue) {
-      console.log("Empty input, using Google as default but not modifying input");
-      const googleBang = combinedBangs.find(b => b.s.toLowerCase() === 'google' && 
-        (Array.isArray(b.t) ? b.t.includes('g') : b.t === 'g'));
-      
-      if (googleBang) {
-        // Update settings and display
-        const trigger = Array.isArray(googleBang.t) 
-          ? (googleBang.t.includes('g') ? 'g' : googleBang.t[0]) 
-          : googleBang.t;
-          
-        this.settings.defaultBang = trigger;
-        
-        // Update the display label only, NOT the input field
-        this.displayManager.updateCurrentBangDisplay('Google (default)');
+      console.log("Empty input, keeping current default bang");
+      // Optionally update display to reflect current state, but don't change settings
+      if (this.settings.defaultBang) {
+        const currentBang = combinedBangs.find(b => 
+          (Array.isArray(b.t) ? b.t.includes(this.settings.defaultBang!) : b.t === this.settings.defaultBang!)
+        );
+        if (currentBang) {
+          this.displayManager.updateCurrentBangDisplay(currentBang.s);
+        }
+      } else {
+        this.displayManager.updateCurrentBangDisplay('No default bang set');
       }
       return;
     }

@@ -3,7 +3,7 @@ import { BangItem } from "../types/BangItem";
 import { UserSettings, loadSettings, saveSettings } from "../utils/settings";
 import { BangFormModal } from "./BangFormModal";
 import { clearBangFilterCache } from "../utils/bangCoreUtil";
-import { MainModal, ModalFooterButton } from "./MainModal";
+import { MainModal } from "./MainModal";
 
 /**
  * Modal for managing custom bangs
@@ -26,7 +26,6 @@ export class CustomBangModal extends MainModal {
     
     this.settings = loadSettings();
     this.onSettingsChange = onSettingsChange;
-    // Update the callback signature for BangFormModal constructor
     this.bangFormModal = new BangFormModal(
       (updatedBang: BangItem | null, originalBangFromForm: BangItem | null, isEdit: boolean) => {
         this.handleBangSave(updatedBang, originalBangFromForm, isEdit);
@@ -34,184 +33,171 @@ export class CustomBangModal extends MainModal {
     );
   }
 
-  /**
-   * Shows the custom bang manager modal
-   */
   public show(): void {
-    // Call parent show method first to create the modal structure
     super.show();
-    
-    // Create content now that modal structure exists
     this.createContent();
-    
-    // Refresh the bang list - this ensures list is up-to-date if already created
     if (this.bangList) {
       this.refreshBangList();
     }
   }
 
-  /**
-   * Creates and sets the modal content
-   */
+  protected createModal(): void {
+    super.createModal();
+    if (this.overlay) {
+      this.overlay.className = `fixed inset-0 bg-black/60 z-[${this.config.zIndex}] flex items-center justify-center transition-opacity duration-300`;
+    }
+    if (this.modal) {
+      this.modal.className = `bg-[#180a22] border border-[#3a1a4a] rounded-none w-full max-w-${this.config.maxWidth} flex flex-col max-h-[95vh] transition-all duration-300`;
+    }
+    if (this.headerElement) {
+      this.headerElement.className = 'rounded-t-md bg-[#250c32] border-b border-[#3a1a4a] px-6 py-4 flex justify-between items-center flex-shrink-0';
+    }
+    if (this.contentElement) {
+      this.contentElement.className = 'flex-grow overflow-y-auto p-6 min-h-0 rounded-b-md';
+    }
+  }
+
   private createContent(): void {
-    // Create container for content
     const content = createElement('div', {
-      className: 'space-y-4'
+      className: 'space-y-6'
     });
     
-    // Create description
-    const description = createElement('p', {
-      className: 'text-white/70 text-sm mb-4'
-    }, ['Create and manage your custom bang shortcuts. Custom bangs will override default bangs with the same shortcut.']);
-    
-    // Create add button
+    // Add button as prominent top action
     const addButtonContainer = createElement('div', {
-      className: 'mb-4 flex justify-end'
+      className: 'flex justify-end'
     });
-    
     const addButton = createElement('button', {
-      className: 'bg-[#3a86ff] hover:bg-[#2a76ef] text-white px-4 py-2 rounded-full flex items-center transition-colors',
+      className: 'bg-[#7c3aed] hover:bg-[#6d28d9] text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors font-medium',
       type: 'button'
     }, [
-      createElement('span', { className: 'mr-1' }, ['+']),
+      createElement('span', { className: 'text-sm' }, ['+']),
       'Add Custom Bang'
     ]);
-    
     addButton.addEventListener('click', () => {
       if (this.bangFormModal) {
         this.bangFormModal.show();
       }
     });
-    
     addButtonContainer.appendChild(addButton);
     
-    // Create bang list container
+    // Description
+    const description = createElement('p', {
+      className: 'text-gray-300 text-sm leading-relaxed'
+    }, ['Create and manage your custom bang shortcuts. Custom bangs will override default bangs with the same shortcut.']);
+    
+    // Bang list container
     this.bangList = createElement('div', {
-      className: 'max-h-[40vh] overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent'
+      className: 'border border-[#3a1a4a] rounded-md overflow-hidden'
     });
     
-    // Populate bang list
-    this.refreshBangList();
+    // Table header
+    const tableHeader = createElement('div', {
+      className: 'grid grid-cols-[120px_1fr_2fr_auto] gap-4 p-4 bg-[#250c32] border-b border-[#3a1a4a] font-medium text-gray-300 text-sm uppercase tracking-wide'
+    });
+    tableHeader.innerHTML = `
+      <span>Trigger</span>
+      <span>Service</span>
+      <span>URL Pattern</span>
+      <span>Actions</span>
+    `;
     
-    content.append(description, addButtonContainer, this.bangList);
+    const tableBody = createElement('div', {
+      className: 'max-h-[40vh] overflow-y-auto'
+    });
     
-    // Set content to the modal
+    this.bangList.append(tableHeader, tableBody);
+    this.bangListContainer = tableBody; // Use a separate container for items
+    
+    content.append(addButtonContainer, description, this.bangList);
     this.setContent(content);
-    
-    // Set footer button
-    const footerButtons: ModalFooterButton[] = [
-      {
-        text: 'Close',
-        type: 'secondary',
-        onClick: () => this.hide()
-      }
-    ];
-    
-    this.setFooterButtons(footerButtons);
+    this.refreshBangList();
   }
 
-  /**
-   * Refreshes the list of custom bangs
-   */
+  private bangListContainer: HTMLDivElement | null = null;
+
   private refreshBangList(): void {
-    if (!this.bangList) return;
+    if (!this.bangListContainer) return;
     
-    this.bangList.innerHTML = '';
+    this.bangListContainer.innerHTML = '';
     
-    // If no custom bangs, show a message
     if (!this.settings.customBangs || this.settings.customBangs.length === 0) {
       const emptyMessage = createElement('div', {
-        className: 'text-white/50 text-center py-6'
-      }, ['No custom bangs yet. Add one to get started!']);
-      
-      this.bangList.appendChild(emptyMessage);
+        className: 'text-center py-8 text-gray-400'
+      }, ['No custom bangs yet. Add one above to get started!']);
+      this.bangListContainer.appendChild(emptyMessage);
       return;
     }
     
-    // Add each custom bang to the list
-    this.settings.customBangs.forEach(bang => {
+    // Sort bangs alphabetically by primary trigger
+    const sortedBangs = [...this.settings.customBangs].sort((a, b) => {
+      const triggerA = Array.isArray(a.t) ? a.t[0] : a.t;
+      const triggerB = Array.isArray(b.t) ? b.t[0] : b.t;
+      return triggerA.localeCompare(triggerB);
+    });
+    
+    sortedBangs.forEach(bang => {
       const bangItem = this.createBangListItem(bang);
-      this.bangList?.appendChild(bangItem);
+      this.bangListContainer!.appendChild(bangItem);
     });
   }
 
-  /**
-   * Creates a list item for a bang
-   */
   private createBangListItem(bang: BangItem): HTMLDivElement {
     const item = createElement('div', {
-      className: 'p-4 hover:bg-black/30 border-b border-white/10 last:border-b-0 flex justify-between items-center'
+      className: 'grid grid-cols-[120px_1fr_2fr_auto] gap-4 p-4 hover:bg-[#250c32] border-b border-[#3a1a4a] last:border-b-0 items-center'
     });
     
-    // Left side - Bang info
-    const bangInfo = createElement('div', {
-      className: 'flex-1'
-    });
-    
-    // Bang trigger and service
-    const titleRow = createElement('div', {
-      className: 'flex items-center gap-2 mb-1'
-    });
-    
-    // Format trigger display - handle both string and array
+    // Format trigger
     const triggerText = Array.isArray(bang.t) 
       ? bang.t.map(t => `!${t}`).join(', ') 
       : `!${bang.t}`;
-    
-    const trigger = createElement('span', {
-      className: 'font-mono text-[#3a86ff] font-bold'
+    const triggerCell = createElement('div', {
+      className: 'font-mono text-[#7c3aed] font-semibold text-sm truncate'
     }, [triggerText]);
     
-    const service = createElement('span', {
-      className: 'text-white'
+    // Service
+    const serviceCell = createElement('div', {
+      className: 'text-gray-300 font-medium text-sm'
     }, [bang.s]);
     
-    titleRow.append(trigger, service);
-    
-    // URL pattern
-    const urlPattern = createElement('div', {
-      className: 'text-white/60 text-sm truncate max-w-[250px]'
+    // URL
+    const urlCell = createElement('div', {
+      className: 'text-gray-400 text-xs truncate leading-relaxed'
     }, [bang.u]);
     
-    bangInfo.append(titleRow, urlPattern);
-    
-    // Right side - Actions
-    const actions = createElement('div', {
+    // Actions
+    const actionsCell = createElement('div', {
       className: 'flex items-center gap-2'
     });
-    
-    // Edit button
     const editButton = createElement('button', {
-      className: 'text-white/70 hover:text-white p-1 transition-colors',
-      title: 'Edit'
+      className: 'text-gray-400 hover:text-[#7c3aed] p-2 rounded transition-colors hover:bg-[#250c32]',
+      title: 'Edit',
+      type: 'button'
     }, ['✏️']);
-    
-    editButton.addEventListener('click', () => {
+    editButton.addEventListener('click', (e) => {
+      e.stopPropagation();
       if (this.bangFormModal) {
         this.bangFormModal.show(bang);
       }
     });
-    
-    // Delete button
     const deleteButton = createElement('button', {
-      className: 'text-white/70 hover:text-[#ff3a3a] p-1 transition-colors',
-      title: 'Delete'
+      className: 'text-gray-400 hover:text-red-400 p-2 rounded transition-colors hover:bg-[#250c32]',
+      title: 'Delete',
+      type: 'button'
     }, ['🗑️']);
-    
-    deleteButton.addEventListener('click', () => {
+    deleteButton.addEventListener('click', (e) => {
+      e.stopPropagation();
       this.deleteBang(bang);
     });
+    actionsCell.append(editButton, deleteButton);
     
-    actions.append(editButton, deleteButton);
-    
-    item.append(bangInfo, actions);
-    
+    item.append(triggerCell, serviceCell, urlCell, actionsCell);
     return item;
   }
 
-  /**
-   * Handles saving a new or edited bang
-   */
+  private normalizeTriggers(trigger: string | string[]): string[] {
+    return (Array.isArray(trigger) ? trigger : [String(trigger)]).sort();
+  }
+
   private handleBangSave(updatedBang: BangItem | null, originalBangFromForm: BangItem | null, isEdit: boolean): void {
     if (!updatedBang) return;
 
@@ -220,21 +206,11 @@ export class CustomBangModal extends MainModal {
     }
 
     if (isEdit && originalBangFromForm) {
-      // Find the index of the original bang.
-      // The trigger 't' is the primary key and is read-only during edit.
       const index = this.settings.customBangs.findIndex(existingBang => {
-        // Helper to normalize triggers to an array of strings for comparison
-        const normalizeAndSortTriggers = (trigger: string | string[]): string[] =>
-            (Array.isArray(trigger) ? trigger : [String(trigger)]).sort();
-
-        const originalFormTriggersSorted = normalizeAndSortTriggers(originalBangFromForm.t);
-        const existingTriggersSorted = normalizeAndSortTriggers(existingBang.t);
-
-        // Compare sorted trigger arrays for content equality
-        const triggersMatch = originalFormTriggersSorted.length === existingTriggersSorted.length &&
-                              originalFormTriggersSorted.every((val, idx) => val === existingTriggersSorted[idx]);
-
-        // Also check service and domain for robustness, though unique trigger should be primary.
+        const originalTriggers = this.normalizeTriggers(originalBangFromForm.t);
+        const existingTriggers = this.normalizeTriggers(existingBang.t);
+        const triggersMatch = originalTriggers.length === existingTriggers.length &&
+                              originalTriggers.every((val, idx) => val === existingTriggers[idx]);
         return triggersMatch &&
                existingBang.s === originalBangFromForm.s &&
                existingBang.d === originalBangFromForm.d;
@@ -243,95 +219,69 @@ export class CustomBangModal extends MainModal {
       if (index !== -1) {
         this.settings.customBangs[index] = updatedBang;
       } else {
-        console.error(
-          "Error editing bang: Original bang not found in settings. Original from form:",
-          originalBangFromForm,
-          "Current customBangs:",
-          this.settings.customBangs
-        );
-        // Optionally, inform the user about the error.
-        // For now, we'll just log it and not save if the original isn't found to prevent duplicates.
-        this.refreshBangList(); // Refresh to show the user the current (unchanged) state
-        return; // Exit if original not found
+        console.error("Error editing bang: Original not found.");
+        this.refreshBangList();
+        return;
       }
     } else if (!isEdit) {
-      // Add new bang
       this.settings.customBangs.push(updatedBang);
     } else {
-      // This case (isEdit is true but originalBangFromForm is null) indicates an issue.
-      console.error("Error editing bang: In edit mode but no original bang reference was passed from form.");
+      console.error("Error: Edit mode without original bang.");
       this.refreshBangList();
-      return; // Exit early
+      return;
     }
 
-    // Save settings and refresh the list
+    saveSettings(this.settings); // Add save for consistency
     this.onSettingsChange(this.settings);
     clearBangFilterCache();
     this.refreshBangList();
   }
 
-  /**
-   * Creates a non-blocking confirmation dialog
-   */
   private showConfirmationDialog(message: string, onConfirm: () => void): void {
-    // Remove any existing confirmation dialog
     if (this.confirmationDialog && document.body.contains(this.confirmationDialog)) {
       document.body.removeChild(this.confirmationDialog);
     }
     
-    // Create dialog container
     this.confirmationDialog = createElement('div', {
-      className: 'fixed inset-0 bg-black/70 backdrop-blur-sm z-[70] flex items-center justify-center transition-opacity duration-200',
+      className: 'fixed inset-0 bg-black/60 z-[70] flex items-center justify-center transition-opacity duration-200',
       style: 'opacity: 0;'
     });
     
-    // Create dialog box
     const dialogBox = createElement('div', {
-      className: 'bg-[#1e0b30] border border-white/10 rounded-lg shadow-xl max-w-sm p-6 transition-transform duration-200',
+      className: 'bg-[#180a22] border border-[#3a1a4a] rounded-md max-w-sm p-6 transition-all duration-200',
       style: 'transform: translateY(20px);'
     });
     
-    // Add message
     const messageElement = createElement('p', {
-      className: 'text-white text-lg mb-6'
+      className: 'text-gray-200 text-base mb-6 leading-relaxed'
     }, [message]);
     
-    // Add buttons container
     const buttonsContainer = createElement('div', {
-      className: 'flex justify-end gap-3'
+      className: 'flex justify-end gap-3 pt-2'
     });
     
-    // Cancel button
     const cancelButton = createElement('button', {
-      className: 'bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded transition-colors',
+      className: 'bg-[#250c32] hover:bg-[#3a1a4a] text-gray-200 px-4 py-2 rounded-md transition-colors border border-[#3a1a4a]',
       type: 'button'
     }, ['Cancel']);
     
-    // Delete button
     const confirmButton = createElement('button', {
-      className: 'bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition-colors',
+      className: 'bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition-colors border border-red-600',
       type: 'button'
     }, ['Delete']);
     
-    // Add click handlers
-    cancelButton.addEventListener('click', () => {
-      this.closeConfirmationDialog();
-    });
-    
+    cancelButton.addEventListener('click', () => this.closeConfirmationDialog());
     confirmButton.addEventListener('click', () => {
       onConfirm();
       this.closeConfirmationDialog();
     });
     
-    // Assemble dialog
     buttonsContainer.append(cancelButton, confirmButton);
     dialogBox.append(messageElement, buttonsContainer);
     this.confirmationDialog.appendChild(dialogBox);
     
-    // Add to body
     document.body.appendChild(this.confirmationDialog);
     
-    // Animate in
     setTimeout(() => {
       if (this.confirmationDialog) {
         this.confirmationDialog.style.opacity = '1';
@@ -339,38 +289,30 @@ export class CustomBangModal extends MainModal {
       }
     }, 10);
     
-    // Close when clicking outside
     this.confirmationDialog.addEventListener('click', (e) => {
       if (e.target === this.confirmationDialog) {
         this.closeConfirmationDialog();
       }
     });
     
-    // Add ESC key handler
     const escHandler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         this.closeConfirmationDialog();
         document.removeEventListener('keydown', escHandler);
       }
     };
-    
     document.addEventListener('keydown', escHandler);
   }
   
-  /**
-   * Close the confirmation dialog
-   */
   private closeConfirmationDialog(): void {
     if (!this.confirmationDialog) return;
     
-    // Animate out
     this.confirmationDialog.style.opacity = '0';
     const dialogBox = this.confirmationDialog.querySelector('div');
     if (dialogBox) {
       dialogBox.style.transform = 'translateY(20px)';
     }
     
-    // Remove after animation
     setTimeout(() => {
       if (this.confirmationDialog && document.body.contains(this.confirmationDialog)) {
         document.body.removeChild(this.confirmationDialog);
@@ -379,42 +321,30 @@ export class CustomBangModal extends MainModal {
     }, 200);
   }
 
-  /**
-   * Deletes a bang
-   */
   private deleteBang(bang: BangItem): void {
     this.pendingDeleteBang = bang;
     
-    // Format trigger display for the confirmation message
     const triggerText = Array.isArray(bang.t) 
       ? bang.t.map(t => `!${t}`).join(', ') 
       : `!${bang.t}`;
     
     this.showConfirmationDialog(
-      `Are you sure you want to delete the ${triggerText} bang?`,
+      `Are you sure you want to delete the ${triggerText} bang? This action cannot be undone.`,
       this.confirmDeleteBang.bind(this)
     );
   }
   
-  /**
-   * Actually performs the bang deletion after confirmation
-   */
   private confirmDeleteBang(): void {
     if (!this.pendingDeleteBang || !this.settings.customBangs) return;
     
-    // Remove bang from settings
     this.settings.customBangs = this.settings.customBangs.filter(
       b => b.t !== this.pendingDeleteBang!.t
     );
     
-    // Save settings
     saveSettings(this.settings);
     this.onSettingsChange(this.settings);
     
-    // Refresh the bang list
     this.refreshBangList();
-    
-    // Clear the pending delete
     this.pendingDeleteBang = null;
   }
 } 

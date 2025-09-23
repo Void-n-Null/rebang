@@ -23,21 +23,19 @@ export class SearchInputComponent {
     
     // Create input wrapper with integrated search button
     const inputWrapper = createElement('div', {
-      className: 'relative w-full'
+      className: 'relative w-full px-4'
     });
     
     // Create clickable ReBang logo on the right that acts as a submit button
     const searchButton = createElement('button', {
       type: 'submit',
-      className: 'absolute right-4 top-1/2 transform -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-transparent hover:scale-110 active:scale-95 transition-all outline-none focus:outline-none focus:ring-0 z-10'
+      className: 'absolute right-8 top-1/2 transform -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-transparent hover:scale-110 z-10'
     });
     
     // Add the ReBang logo with shadow and no background
     const logoImg = createElement('img', {
-      src: '/ReBangLogoSillo.png',
-      alt: '',
-      style: '',
-      className: 'w-8 h-8 filter drop-shadow-[0_2px_3px_rgba(0,0,0,0.7)]'
+      src: '/newbang.svg',
+      className: 'w-6 h-6 md:block hidden'
     });
     
     searchButton.appendChild(logoImg);
@@ -46,7 +44,7 @@ export class SearchInputComponent {
     this.searchInput = createElement('input', {
       type: 'text',
       placeholder: 'Type your search query or !bang search',
-      className: 'w-full px-4 py-2 sm:py-3 pr-14 bg-black/20 backdrop-blur-sm hover:bg-black/30 placeholder-white/50 rounded-xl border border-white/10 focus:border-[#3a86ff]/50 focus:bg-black/40 focus:outline-none transition-all text-white shadow-lg',
+      className: 'w-full px-4 py-2 sm:py-3 bg-black/20 hover:bg-black/30 placeholder-white/30 rounded-xl focus:bg-black/40 outline-none focus:outline-none text-white',
       autocomplete: 'off',
       spellcheck: 'false',
       autocapitalize: 'off'

@@ -62,7 +62,7 @@ export class MainModal extends BaseModal {
         
         // Create footer container - Ensure it doesn't shrink
         this.footerElement = createElement('div', {
-            className: 'bg-black/30 px-6 py-4 flex justify-end gap-2 flex-shrink-0'
+            className: 'bg-black/30 px-6 flex justify-end gap-2 flex-shrink-0'
         });
         
         // Assemble modal using the flex layout
