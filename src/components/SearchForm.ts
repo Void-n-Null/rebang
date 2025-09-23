@@ -9,6 +9,7 @@ import { SearchInfoComponent, BangExample } from "./SearchInfoComponent";
 import { BangSuggestionManager } from "./BangSuggestionManager";
 import { SearchHeaderComponent } from "./SearchHeaderComponent";
 import { getParametersFromUrl } from "../utils/urlUtils";
+import { showLoadingOverlay, hideOverlay } from "../utils/overlays";
 export class SearchForm {
   private container: HTMLDivElement;
   private settingsModal: SettingsModal;
@@ -79,32 +80,13 @@ export class SearchForm {
         // Input events will be handled by the bang suggestion manager
       },
       onSubmit: (query) => {
-        // Create a loading overlay to prevent white flash
-        const loadingOverlay = createElement('div', {
-          className: 'fixed inset-0 bg-[#000] bg-opacity-90 z-50 flex items-center justify-center',
-          style: 'backdrop-filter: blur(5px);'
-        });
-        
-        const spinner = createElement('div', {
-          className: 'w-12 h-12 border-4 border-[#3a86ff] border-t-transparent rounded-full animate-spin'
-        });
-        
-        loadingOverlay.appendChild(spinner);
-        document.body.appendChild(loadingOverlay);
-        
-        // Short timeout to ensure the overlay is visible before redirect
+        const loadingOverlay = showLoadingOverlay();
         setTimeout(() => {
-          // Instead of directly changing location, use history.pushState to update the URL
-          // This allows proper handling of back button navigation
           const newUrl = `${window.location.origin}?q=${encodeURIComponent(query)}`;
           history.pushState({ query }, '', newUrl);
-          
-          // Then manually trigger the redirect logic
           const redirected = performRedirect();
-          
-          // If redirection somehow fails, remove the overlay
           if (!redirected) {
-            document.body.removeChild(loadingOverlay);
+            hideOverlay(loadingOverlay);
           }
         }, 100);
       }
