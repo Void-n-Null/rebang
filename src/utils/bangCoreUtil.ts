@@ -20,6 +20,13 @@ let isFullDatabaseLoaded = false;
 let currentBaseBangs: BangItem[] = topBangs;
 
 /**
+ * Indicates whether the full bang database has already been loaded.
+ */
+export function hasFullDatabaseLoaded(): boolean {
+  return isFullDatabaseLoaded;
+}
+
+/**
  * Loads the full bang database if not already loaded
  */
 export async function ensureFullDatabase(): Promise<void> {
@@ -119,13 +126,13 @@ export function clearBangFilterCache(): void {
 }
   
 export function determineBangUsed(bangCandidate: string, defaultBang: BangItem): BangItem {
-  return findBang(bangCandidate) ?? defaultBang;
+return findBang(bangCandidate) ?? defaultBang;
 }
 
 export function determineBangCandidate(query: string, defaultBang: BangItem): string {
-    const match = query.match(/!(\S+)/i);
-    const matchBangTrigger = match?.[1]?.toLowerCase();
-    const defaultBangFirstTrigger = Array.isArray(defaultBang?.t) ? defaultBang?.t[0] : defaultBang?.t
+const match = query.match(/!(\S+)/i);
+const matchBangTrigger = match?.[1]?.toLowerCase();
+const defaultBangFirstTrigger = Array.isArray(defaultBang?.t) ? defaultBang?.t[0] : defaultBang?.t
 
-    return matchBangTrigger ?? defaultBangFirstTrigger ?? FALLBACK_BANG_TRIGGER;
+return matchBangTrigger ?? defaultBangFirstTrigger ?? FALLBACK_BANG_TRIGGER;
 }

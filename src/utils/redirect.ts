@@ -1,9 +1,8 @@
 import { loadSettings } from "./settings";
 
-import { showRedirectLoadingScreen } from "../components/RedirectLoadingScreen";
 import { BangItem } from "../types/BangItem";
 import { getParametersFromUrl, validateRedirectUrl, getBaseDomain } from "./urlUtils"; 
-import { determineBangCandidate, determineBangUsed, getBangFirstTrigger, ensureFullDatabase, getBangFirstTrigger as getTrigger } from "./bangCoreUtil";
+import { determineBangCandidate, determineBangUsed, getBangFirstTrigger, ensureFullDatabase } from "./bangCoreUtil";
 import { findDefaultBangFromSettings } from "./bangSettingsUtil";
 
 /**
@@ -34,7 +33,7 @@ async function getRedirect(urlParams: URLSearchParams): Promise<BangRedirectResu
     
     // First attempt: Try with current loaded bangs (Top 500)
     let selectedBang: BangItem = determineBangUsed(bangCandidate, defaultBang);
-    let selectedTrigger = getTrigger(selectedBang);
+    let selectedTrigger = getBangFirstTrigger(selectedBang);
 
     // Check if we missed the requested bang
     // If the candidate we extracted (e.g. "obscure") is different from the one we found (e.g. "g"),
@@ -46,7 +45,7 @@ async function getRedirect(urlParams: URLSearchParams): Promise<BangRedirectResu
         
         // Retry with full database
         selectedBang = determineBangUsed(bangCandidate, defaultBang);
-        selectedTrigger = getTrigger(selectedBang);
+        selectedTrigger = getBangFirstTrigger(selectedBang);
     }
 
     const bangName = selectedTrigger;
@@ -112,24 +111,8 @@ export async function performRedirect(): Promise<boolean> {
     // Benchmark: Calculate time from navigation start to now
     const now = performance.now();
     console.log(`[ReBang Benchmark] Time to calculate redirect: ${now.toFixed(2)}ms`);
-
-    const bangName = redirect.bangUsed || "search";
-    if (loadSettings().showRedirectLoadingScreen) {
-    showRedirectLoadingScreen(bangName, url)
-      .then(() => {
-        if (validateRedirectUrl(url)) 
-          window.location.replace(url);
-        else
-          console.error("Final URL validation failed");
-        
-      })
-      .catch(error => {
-        console.error("Error showing loading screen:", error);
-        window.location.replace(url);
-      });
-    } else {
-      window.location.replace(url);
-    }
+    
+    window.location.replace(url);
     
     return true;
   } catch (error) {

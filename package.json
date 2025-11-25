@@ -10,7 +10,11 @@
   },
   "devDependencies": {
     "@types/node": "^22.13.9",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.16",
+    "eslint": "^9.22.0",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
     "typescript": "~5.7.2",
@@ -19,8 +23,9 @@
   "dependencies": {
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
-    "eslint": "^9.22.0",
     "query-string": "^9.1.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "vite-plugin-pwa": "^0.21.1",
     "workbox-window": "^7.3.0"
   }

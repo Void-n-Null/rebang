@@ -98,4 +98,4 @@ self.onmessage = async (e: MessageEvent) => {
     workerCache.clear();
     self.postMessage({ type: 'CACHE_CLEARED' });
   }
-};
+}; 

@@ -23,4 +23,4 @@ export function findDefaultBangFromSettings(): BangItem {
 
 export function getCombinedBangsFromSettings(): BangItem[] {
     return getCombinedBangs();
-}
+    }

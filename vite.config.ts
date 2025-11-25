@@ -1,11 +1,13 @@
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [
+    react(),
     VitePWA({
       // registerType: "autoUpdate",
-            // registerType: "autoUpdate", // Keep this commented out
+      // registerType: "autoUpdate", // Keep this commented out
       // Add manifest options
       manifest: {
         name: 'ReBang', // Replace with your actual app name if different
