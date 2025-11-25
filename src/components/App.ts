@@ -3,12 +3,7 @@ import { Footer } from "./Footer";
 import { SearchForm } from "./SearchForm";
 import { createLogo } from "./Logo";
 import { createHeader } from "./Header";
-import { createRecursiveJokeContainer } from "./RecursiveJokes";
 import { injectGlobalAnimations } from "./animations";
-import { ensureRecursiveInputStyling } from "../utils/styles";
-
-// Import helper function from redirect.ts
-import { getParametersFromUrl } from "../utils/urlUtils";
 
 export class App {
   private container: HTMLDivElement;
@@ -35,31 +30,10 @@ export class App {
     const headerContainer = createHeader();
     
     // Create search form early so we can position elements properly
-    // Always use the recursive styling for the search form
     this.searchForm = new SearchForm();
-    
-    // Ensure recursive input styling CSS exists, then add class names to inputs
-    ensureRecursiveInputStyling();
-    setTimeout(() => {
-      const searchInputs = document.querySelectorAll('input[type="text"]');
-      searchInputs.forEach(input => {
-        input.classList.add('recursive-input');
-      });
-    }, 300);
-    
-    // Check if this is a recursive mode request
-    const urlParams = getParametersFromUrl(window.location.href);
-    const isRecursive = urlParams.get("recursive") === "true";
-    
+
     // Assemble the UI components
-    if (isRecursive) {
-      // Add recursive joke if in recursive mode
-      const jokeContainer = createRecursiveJokeContainer();
-      contentContainer.append(logoContainer, headerContainer, jokeContainer, this.searchForm.getElement());
-    } else {
-      // Standard layout
-      contentContainer.append(logoContainer, headerContainer, this.searchForm.getElement());
-    }
+    contentContainer.append(logoContainer, headerContainer, this.searchForm.getElement());
     
     // Create footer
     const footer = new Footer();

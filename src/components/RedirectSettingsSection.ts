@@ -49,11 +49,15 @@ export class RedirectSettingsSection {
       className: 'flex items-center mt-2'
     });
     
-    // Create the checkbox input
+    // Create the checkbox input (styled as a switch)
+    const label = createElement('label', {
+        className: 'relative inline-flex items-center cursor-pointer'
+    });
+
     const checkbox = createElement('input', {
       type: 'checkbox',
       id: 'redirect-loading-toggle',
-      className: 'w-4 h-4 text-[#3a86ff] bg-gray-700 border-gray-600 rounded focus:ring-[#3a86ff]'
+      className: 'sr-only peer'
     }) as HTMLInputElement;
     
     // Set initial state from settings
@@ -61,16 +65,19 @@ export class RedirectSettingsSection {
     
     // Add event listener
     checkbox.addEventListener('change', this.handleToggleRedirectScreen);
-    
-    // Create label for the checkbox
-    const label = createElement('label', {
-      htmlFor: 'redirect-loading-toggle',
-      className: 'ml-2 text-sm text-white'
+
+    const switchBg = createElement('div', {
+        className: "w-11 h-6 bg-white/10 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#7c3aed]"
     });
-    label.textContent = 'Show loading screen during redirects';
+
+    const textLabel = createElement('span', {
+      className: 'ml-3 text-sm font-medium text-white/80'
+    }, ['Show loading screen during redirects']);
+    
+    label.append(checkbox, switchBg, textLabel);
     
     // Assemble the toggle container
-    toggleContainer.append(checkbox, label);
+    toggleContainer.appendChild(label);
     
     // Add toggle to form group
     formGroup.appendChild(toggleContainer);

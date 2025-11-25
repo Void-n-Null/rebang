@@ -2,10 +2,7 @@
 
 import { BangItem } from "../types/BangItem";
 import { loadSettings } from "./settings";
-import { bangs as preDefinedBangs } from "../bang";
-import { FALLBACK_BANG_TRIGGER } from "./bangCoreUtil";
-import { findBang } from "./bangCoreUtil";
-import { combineBangs } from "./bangSearchUtil";
+import { FALLBACK_BANG_TRIGGER, findBang, getCombinedBangs } from "./bangCoreUtil";
 
 export function findDefaultBangFromSettings(): BangItem {
     // First try to find the user's preferred default bang
@@ -23,16 +20,7 @@ export function findDefaultBangFromSettings(): BangItem {
       r: 1000 // High relevance score
     };
   }
-  
-
 
 export function getCombinedBangsFromSettings(): BangItem[] {
-    const settings = loadSettings();
-    if (!settings.customBangs || settings.customBangs.length === 0) {
-      return preDefinedBangs;
-    }
-  
-    // Use the utility function to combine bangs
-    return combineBangs(preDefinedBangs, settings.customBangs);
-  }
-
+    return getCombinedBangs();
+}

@@ -5,7 +5,7 @@ import { performRedirect } from "../utils/redirect";
 import { CustomBangModal } from "./CustomBangModal";
 import { bangWorker } from "../utils/workerUtils";
 import { SearchInputComponent } from "./SearchInputComponent";
-import { SearchInfoComponent, BangExample } from "./SearchInfoComponent";
+import { SearchInfoComponent } from "./SearchInfoComponent";
 import { BangSuggestionManager } from "./BangSuggestionManager";
 import { SearchHeaderComponent } from "./SearchHeaderComponent";
 import { getParametersFromUrl } from "../utils/urlUtils";
@@ -31,13 +31,6 @@ export class SearchForm {
     this.container = createElement('div', { 
       className: 'w-full mt-10 pt-6 border-t border-white/10 relative' 
     });
-    
-    // Check if this is a recursive query
-    const urlParams = getParametersFromUrl(window.location.href);
-    const isRecursive = urlParams.get("recursive") === "true";
-    const query = urlParams.get("q");
-    
-    console.log("SearchForm constructor - Is Recursive:", isRecursive, "Query:", query);
     
     // Initialize custom bang manager
     this.customBangManagerModal = new CustomBangModal((newSettings) => {
@@ -65,7 +58,6 @@ export class SearchForm {
     
     // Create and initialize the search header component
     this.searchHeader = new SearchHeaderComponent({
-      isRecursive,
       onCustomBangsClick: () => {
         this.customBangManagerModal.show();
       },
@@ -142,45 +134,18 @@ export class SearchForm {
   
   public focus(): void {
     setTimeout(() => {
-      // Check if this is a recursive query
       const urlParams = getParametersFromUrl(window.location.href);
-      const isRecursive = urlParams.get("recursive") === "true";
       const query = urlParams.get("q");
       
       // Get the input element
       const inputElement = this.searchInput.getInputElement();
-      
-      // Always add the recursive styling
-      inputElement.classList.add('recursive-input');
-      
-      // Create and add a CSS rule for the subtle effect if it doesn't exist
-      if (!document.getElementById('recursive-style')) {
-        const style = document.createElement('style');
-        style.id = 'recursive-style';
-        style.textContent = `
-          .recursive-input {
-            border-color: rgba(138, 43, 226, 0.3) !important;
-            transition: all 0.3s ease;
-          }
-          
-          .recursive-input:focus {
-            border-color: rgba(138, 43, 226, 0.5) !important;
-            box-shadow: 0 0 10px rgba(138, 43, 226, 0.2);
-          }
-        `;
-        document.head.appendChild(style);
-      }
-      
-      if (isRecursive && query) {
-        console.log("Filling search input with query:", query);
-        // If we have a recursive query, fill the search input with it
+
+      if (query) {
+        // Fill the search input with the existing query parameter
         this.searchInput.setValue(query);
         
         // Ensure cursor is positioned at the end
         inputElement.selectionStart = inputElement.selectionEnd = query.length;
-        
-        // Update the header to show recursive mode
-        this.searchHeader.updateHeading(true);
       }
       
       this.searchInput.focus();

@@ -29,9 +29,9 @@ export class SearchInfoComponent {
         className: 'inline-flex items-center px-2 py-1 rounded-full bg-white/10 text-white/70 text-xs backdrop-blur-sm transition-all hover:bg-white/20 cursor-pointer'
       }, [`${ex.name} (${ex.desc})`]);
       
-      // Add click event to redirect to search with this bang and recursive=true
+      // Add click event to start a search with this bang
       badge.addEventListener('click', () => {
-        window.location.href = `/?q=${encodeURIComponent(ex.name)}&recursive=true`;
+        window.location.href = `/?q=${encodeURIComponent(ex.name)}`;
       });
       
       this.container.appendChild(badge);
@@ -54,9 +54,9 @@ export class SearchInfoComponent {
         className: 'inline-flex items-center px-2 py-1 rounded-full bg-white/10 text-white/70 text-xs backdrop-blur-sm transition-all hover:bg-white/20 cursor-pointer'
       }, [`${ex.name} (${ex.desc})`]);
       
-      // Add click event to redirect to search with this bang and recursive=true
+      // Add click event to start a search with this bang
       badge.addEventListener('click', () => {
-        window.location.href = `/?q=${encodeURIComponent(ex.name)}&recursive=true`;
+        window.location.href = `/?q=${encodeURIComponent(ex.name)}`;
       });
       
       this.container.appendChild(badge);

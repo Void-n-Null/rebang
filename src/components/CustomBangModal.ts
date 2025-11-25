@@ -41,92 +41,96 @@ export class CustomBangModal extends MainModal {
     }
   }
 
-  protected createModal(): void {
-    super.createModal();
-    if (this.overlay) {
-      this.overlay.className = `fixed inset-0 bg-black/60 z-[${this.config.zIndex}] flex items-center justify-center transition-opacity duration-300`;
+    protected createModal(): void {
+        super.createModal();
+        // No custom overrides needed - MainModal handles the base style now
     }
-    if (this.modal) {
-      this.modal.className = `bg-[#180a22] border border-[#3a1a4a] rounded-none w-full max-w-${this.config.maxWidth} flex flex-col max-h-[95vh] transition-all duration-300`;
-    }
-    if (this.headerElement) {
-      this.headerElement.className = 'rounded-t-md bg-[#250c32] border-b border-[#3a1a4a] px-6 py-4 flex justify-between items-center flex-shrink-0';
-    }
-    if (this.contentElement) {
-      this.contentElement.className = 'flex-grow overflow-y-auto p-6 min-h-0 rounded-b-md';
-    }
-  }
 
-  private createContent(): void {
-    const content = createElement('div', {
-      className: 'space-y-6'
-    });
-    
-    // Add button as prominent top action
-    const addButtonContainer = createElement('div', {
-      className: 'flex justify-end'
-    });
-    const addButton = createElement('button', {
-      className: 'bg-[#7c3aed] hover:bg-[#6d28d9] text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors font-medium',
-      type: 'button'
-    }, [
-      createElement('span', { className: 'text-sm' }, ['+']),
-      'Add Custom Bang'
-    ]);
-    addButton.addEventListener('click', () => {
-      if (this.bangFormModal) {
-        this.bangFormModal.show();
-      }
-    });
-    addButtonContainer.appendChild(addButton);
-    
-    // Description
-    const description = createElement('p', {
-      className: 'text-gray-300 text-sm leading-relaxed'
-    }, ['Create and manage your custom bang shortcuts. Custom bangs will override default bangs with the same shortcut.']);
-    
-    // Bang list container
-    this.bangList = createElement('div', {
-      className: 'border border-[#3a1a4a] rounded-md overflow-hidden'
-    });
-    
-    // Table header
-    const tableHeader = createElement('div', {
-      className: 'grid grid-cols-[120px_1fr_2fr_auto] gap-4 p-4 bg-[#250c32] border-b border-[#3a1a4a] font-medium text-gray-300 text-sm uppercase tracking-wide'
-    });
-    tableHeader.innerHTML = `
-      <span>Trigger</span>
-      <span>Service</span>
-      <span>URL Pattern</span>
-      <span>Actions</span>
-    `;
-    
-    const tableBody = createElement('div', {
-      className: 'max-h-[40vh] overflow-y-auto'
-    });
-    
-    this.bangList.append(tableHeader, tableBody);
-    this.bangListContainer = tableBody; // Use a separate container for items
-    
-    content.append(addButtonContainer, description, this.bangList);
-    this.setContent(content);
-    this.refreshBangList();
-  }
+    private createContent(): void {
+        const content = createElement('div', {
+            className: 'space-y-6'
+        });
+        
+        // Header area with description and Add button
+        const headerArea = createElement('div', {
+            className: 'flex flex-col sm:flex-row sm:items-center justify-between gap-4'
+        });
+
+        const description = createElement('p', {
+            className: 'text-white/60 text-sm leading-relaxed max-w-sm'
+        }, ['Create custom shortcuts that override defaults.']);
+        
+        const addButton = createElement('button', {
+            className: 'bg-[#7c3aed] hover:bg-[#6d28d9] text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all font-medium shadow-lg shadow-purple-900/20 text-sm whitespace-nowrap',
+            type: 'button'
+        }, [
+            createElement('span', { className: 'text-lg leading-none' }, ['+']),
+            'Add Custom Bang'
+        ]);
+        addButton.addEventListener('click', () => {
+            if (this.bangFormModal) {
+                this.bangFormModal.show();
+            }
+        });
+
+        headerArea.append(description, addButton);
+        
+        // Bang list container
+        this.bangList = createElement('div', {
+            className: 'border border-white/10 rounded-lg overflow-hidden bg-white/5'
+        });
+        
+        // Table header
+        const tableHeader = createElement('div', {
+            className: 'grid grid-cols-[120px_1fr_2fr_auto] gap-4 p-4 bg-white/5 border-b border-white/10 font-semibold text-white/70 text-xs uppercase tracking-wider'
+        });
+        tableHeader.innerHTML = `
+            <span>Trigger</span>
+            <span>Service</span>
+            <span>URL Pattern</span>
+            <span class="text-right">Actions</span>
+        `;
+        
+        const tableBody = createElement('div', {
+            className: 'max-h-[40vh] overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent'
+        });
+        
+        this.bangList.append(tableHeader, tableBody);
+        this.bangListContainer = tableBody;
+        
+        content.append(headerArea, this.bangList);
+        this.setContent(content);
+        this.refreshBangList();
+    }
 
   private bangListContainer: HTMLDivElement | null = null;
 
-  private refreshBangList(): void {
-    if (!this.bangListContainer) return;
-    
-    this.bangListContainer.innerHTML = '';
-    
-    if (!this.settings.customBangs || this.settings.customBangs.length === 0) {
-      const emptyMessage = createElement('div', {
-        className: 'text-center py-8 text-gray-400'
-      }, ['No custom bangs yet. Add one above to get started!']);
-      this.bangListContainer.appendChild(emptyMessage);
-      return;
-    }
+    private refreshBangList(): void {
+        if (!this.bangListContainer) return;
+        
+        this.bangListContainer.innerHTML = '';
+        
+        if (!this.settings.customBangs || this.settings.customBangs.length === 0) {
+            const emptyContainer = createElement('div', {
+                className: 'flex flex-col items-center justify-center py-12 text-white/40 gap-3'
+            });
+            
+            const icon = createElement('div', {
+                className: 'text-4xl opacity-50'
+            }, ['✨']);
+            
+            const text = createElement('p', {
+                className: 'text-sm font-medium'
+            }, ['No custom bangs yet']);
+            
+            const subtext = createElement('p', {
+                className: 'text-xs'
+            }, ['Add one to get started!']);
+            
+            emptyContainer.append(icon, text, subtext);
+            this.bangListContainer.appendChild(emptyContainer);
+            return;
+        }
     
     // Sort bangs alphabetically by primary trigger
     const sortedBangs = [...this.settings.customBangs].sort((a, b) => {
@@ -141,58 +145,58 @@ export class CustomBangModal extends MainModal {
     });
   }
 
-  private createBangListItem(bang: BangItem): HTMLDivElement {
-    const item = createElement('div', {
-      className: 'grid grid-cols-[120px_1fr_2fr_auto] gap-4 p-4 hover:bg-[#250c32] border-b border-[#3a1a4a] last:border-b-0 items-center'
-    });
-    
-    // Format trigger
-    const triggerText = Array.isArray(bang.t) 
-      ? bang.t.map(t => `!${t}`).join(', ') 
-      : `!${bang.t}`;
-    const triggerCell = createElement('div', {
-      className: 'font-mono text-[#7c3aed] font-semibold text-sm truncate'
-    }, [triggerText]);
-    
-    // Service
-    const serviceCell = createElement('div', {
-      className: 'text-gray-300 font-medium text-sm'
-    }, [bang.s]);
-    
-    // URL
-    const urlCell = createElement('div', {
-      className: 'text-gray-400 text-xs truncate leading-relaxed'
-    }, [bang.u]);
-    
-    // Actions
-    const actionsCell = createElement('div', {
-      className: 'flex items-center gap-2'
-    });
-    const editButton = createElement('button', {
-      className: 'text-gray-400 hover:text-[#7c3aed] p-2 rounded transition-colors hover:bg-[#250c32]',
-      title: 'Edit',
-      type: 'button'
-    }, ['✏️']);
-    editButton.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (this.bangFormModal) {
-        this.bangFormModal.show(bang);
-      }
-    });
-    const deleteButton = createElement('button', {
-      className: 'text-gray-400 hover:text-red-400 p-2 rounded transition-colors hover:bg-[#250c32]',
-      title: 'Delete',
-      type: 'button'
-    }, ['🗑️']);
-    deleteButton.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.deleteBang(bang);
-    });
-    actionsCell.append(editButton, deleteButton);
-    
-    item.append(triggerCell, serviceCell, urlCell, actionsCell);
-    return item;
-  }
+    private createBangListItem(bang: BangItem): HTMLDivElement {
+        const item = createElement('div', {
+            className: 'grid grid-cols-[120px_1fr_2fr_auto] gap-4 p-4 hover:bg-white/5 border-b border-white/5 last:border-b-0 items-center transition-colors'
+        });
+        
+        // Format trigger
+        const triggerText = Array.isArray(bang.t) 
+            ? bang.t.map(t => `!${t}`).join(', ') 
+            : `!${bang.t}`;
+        const triggerCell = createElement('div', {
+            className: 'font-mono text-[#a788ff] font-semibold text-sm truncate bg-[#a788ff]/10 px-2 py-1 rounded w-fit'
+        }, [triggerText]);
+        
+        // Service
+        const serviceCell = createElement('div', {
+            className: 'text-white font-medium text-sm'
+        }, [bang.s]);
+        
+        // URL
+        const urlCell = createElement('div', {
+            className: 'text-white/50 text-xs truncate font-mono'
+        }, [bang.u]);
+        
+        // Actions
+        const actionsCell = createElement('div', {
+            className: 'flex items-center justify-end gap-2'
+        });
+        const editButton = createElement('button', {
+            className: 'text-white/40 hover:text-white p-1.5 rounded transition-colors hover:bg-white/10',
+            title: 'Edit',
+            type: 'button'
+        }, ['✏️']);
+        editButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (this.bangFormModal) {
+                this.bangFormModal.show(bang);
+            }
+        });
+        const deleteButton = createElement('button', {
+            className: 'text-white/40 hover:text-red-400 p-1.5 rounded transition-colors hover:bg-red-500/10',
+            title: 'Delete',
+            type: 'button'
+        }, ['🗑️']);
+        deleteButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.deleteBang(bang);
+        });
+        actionsCell.append(editButton, deleteButton);
+        
+        item.append(triggerCell, serviceCell, urlCell, actionsCell);
+        return item;
+    }
 
   private normalizeTriggers(trigger: string | string[]): string[] {
     return (Array.isArray(trigger) ? trigger : [String(trigger)]).sort();

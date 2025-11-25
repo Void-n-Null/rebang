@@ -6,6 +6,31 @@ import { MAX_FILTERED_ITEMS, filterAndSortBangs as utilFilterAndSortBangs, combi
 const workerCache = new Map<string, BangItem[]>();
 const MAX_CACHE_SIZE = 50;
 
+// Track full database state
+let allBangs = defaultBangs; // Starts with Top 500
+let isFullLoaded = false;
+let loadPromise: Promise<void> | null = null;
+
+async function ensureFullLoaded() {
+  if (isFullLoaded) return;
+  if (loadPromise) return loadPromise;
+
+  loadPromise = (async () => {
+    try {
+      const res = await fetch('/bangs.json');
+      if (!res.ok) throw new Error('Failed to fetch bangs.json');
+      const data = await res.json();
+      allBangs = data;
+      isFullLoaded = true;
+      // Clear cache as we have new data
+      workerCache.clear();
+    } catch (e) {
+      console.error("Worker failed to load full bangs", e);
+    }
+  })();
+  
+  return loadPromise;
+}
 
 /**
  * Filter and sort bangs based on a query
@@ -41,13 +66,17 @@ function filterAndSortBangs(
 }
 
 // Handle messages from the main thread
-self.onmessage = (e: MessageEvent) => {
+self.onmessage = async (e: MessageEvent) => {
   const { type, query, customBangs = [] } = e.data;
   
   if (type === 'FILTER_BANGS') {
     try {
+      // Ensure we have the full database loaded
+      // This might delay the first search result by ~200ms, but ensures correctness
+      await ensureFullLoaded();
+
       // Combine custom bangs with default bangs using the utility function
-      const combinedBangs = combineBangs(defaultBangs, customBangs);
+      const combinedBangs = combineBangs(allBangs, customBangs);
       
       // Filter bangs based on query
       const filteredBangs = filterAndSortBangs(combinedBangs, query);
@@ -69,4 +98,4 @@ self.onmessage = (e: MessageEvent) => {
     workerCache.clear();
     self.postMessage({ type: 'CACHE_CLEARED' });
   }
-}; 
+};

@@ -72,26 +72,36 @@ export class BangSettingsSection {
     // Use the standardized form group from MainModal
     const formGroup = createFormGroup(
       'Default Bang', 
-      'When set, this bang will be used automatically if you search without specifying a bang.'
+      'Automatically use this bang when searching without a prefix.'
     );
     
-    // Create custom bangs button
-    const customBangsButtonContainer = createElement('div', {
-      className: 'mb-3 flex justify-end'
+    // Create custom bangs button area
+    const headerActions = createElement('div', {
+        className: 'absolute top-0 right-0'
     });
     
     const customBangsButton = createElement('button', {
-      className: 'text-[#3a86ff] hover:text-[#2a76ef] text-sm underline flex items-center gap-1',
+      className: 'text-xs font-medium bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-full transition-colors border border-white/5 hover:border-white/10 flex items-center gap-2',
       type: 'button'
-    });
-    customBangsButton.textContent = 'Manage Custom Bangs';
+    }, [
+        createElement('span', {}, ['Manage Custom Bangs']),
+        createElement('span', { className: 'opacity-50' }, ['→'])
+    ]);
     
     customBangsButton.addEventListener('click', () => {
       this.customBangManagerModal.show();
     });
     
-    customBangsButtonContainer.appendChild(customBangsButton);
+    // We need to inject the button into the label row, which is tricky with createFormGroup.
+    // Instead, we'll just append it after the description for now, or wrap it nicely.
+    // Actually, let's put it *between* description and input.
     
+    const controlsContainer = createElement('div', {
+        className: 'mt-3 space-y-3'
+    });
+
+    controlsContainer.appendChild(customBangsButton);
+
     // Create current bang service display
     const currentBangContainer = this.displayManager.createBangServiceDisplay();
     
@@ -100,9 +110,9 @@ export class BangSettingsSection {
     
     // Assemble the section
     formGroup.append(
-      customBangsButtonContainer,
-      currentBangContainer,
-      inputContainer
+        currentBangContainer,
+        inputContainer,
+        controlsContainer
     );
     
     section.appendChild(formGroup);

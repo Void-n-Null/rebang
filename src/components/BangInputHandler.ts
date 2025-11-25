@@ -1,9 +1,8 @@
-import { createElement } from "../utils/dom";
+import { createElement, debounce } from "../utils/dom";
 import { updateSetting, UserSettings } from "../utils/settings";
 import { BangDropdown } from "./BangDropdown";
 import { setKeyboardNavigationActive } from '../utils/dropdownUtils';
 import { getCombinedBangsFromSettings } from "../utils/bangSettingsUtil";
-import { debounce } from "../utils/debounce";
 import { DefaultBangDisplayManager } from "./DefaultBangDisplayManager";
 
 /**
@@ -42,14 +41,14 @@ export class BangInputHandler {
     
     // Create the bang prefix element
     const bangPrefix = createElement('span', {
-      className: 'absolute left-4 top-1/2 transform -translate-y-1/2 text-white font-bold select-none pointer-events-none z-10'
+      className: 'absolute left-4 top-1/2 transform -translate-y-1/2 text-white/50 font-bold select-none pointer-events-none z-10'
     }, ['!']);
     
     // Create the input with padding for the prefix but without backdrop-blur on the input
     this.inputElement = createElement('input', {
       type: 'text',
-      className: 'w-full pl-7 pr-4 py-3 bg-black/20 hover:bg-black/30 placeholder-white/50 rounded-xl   focus:outline-none transition-all text-white',
-      placeholder: 'Type a bang trigger (e.g., "g" for Google)',
+      className: 'w-full pl-8 pr-10 py-2.5 bg-white/5 hover:bg-white/10 placeholder-white/30 rounded-lg border border-white/10 focus:border-[#7c3aed] focus:ring-1 focus:ring-[#7c3aed] focus:outline-none transition-all text-white text-sm',
+      placeholder: 'search trigger (e.g. "g" for Google)',
       autocomplete: 'off',
       spellcheck: 'false'
     }) as HTMLInputElement;
@@ -57,9 +56,9 @@ export class BangInputHandler {
     // Add clear button
     const clearButton = createElement('button', {
       type: 'button',
-      className: 'absolute right-4 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white/90 transition-colors'
+      className: 'absolute right-3 top-1/2 transform -translate-y-1/2 text-white/30 hover:text-white transition-colors w-5 h-5 flex items-center justify-center rounded-full hover:bg-white/10'
     });
-    clearButton.textContent = '×';
+    clearButton.innerHTML = '&times;';
     
     // Set up input event handlers
     this.setupInputHandlers(this.inputElement, clearButton);

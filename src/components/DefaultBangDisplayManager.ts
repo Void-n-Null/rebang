@@ -23,20 +23,20 @@ export class DefaultBangDisplayManager {
   public createBangServiceDisplay(): HTMLDivElement {
     // Create current bang service label
     const currentBangContainer = createElement('div', {
-      className: 'bg-[#3a0082]/20 rounded-lg p-3 mb-3 flex items-center'
+      className: 'bg-white/5 border border-white/5 rounded-lg p-3 mb-3 flex items-center justify-between'
     });
     
     const currentBangLabel = createElement('div', {
-      className: 'flex-1'
+      className: 'flex items-center gap-2 text-sm'
     });
     
     const currentBangPrefix = createElement('span', {
-      className: 'text-white/70 mr-1'
+      className: 'text-white/50'
     });
-    currentBangPrefix.textContent = 'Currently using: ';
+    currentBangPrefix.textContent = 'Currently using:';
     
     const currentBangService = createElement('span', {
-      className: 'text-[#3a86ff] font-bold',
+      className: 'text-[#a788ff] font-semibold tracking-wide',
       id: 'current-bang-service'
     });
     

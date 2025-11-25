@@ -3,8 +3,9 @@
 import { BangItem } from "../types/BangItem";
 import { BangCache } from "./BangCache";
 import { bangWorker } from "./workerUtils";
-import { getCombinedBangsFromSettings } from "./bangSettingsUtil";
 import { loadSettings } from "./settings";
+import { combineBangs } from "./bangSearchUtil";
+import { topBangs, loadAllBangs } from "../bang";
 
 // Global trigger map cache to avoid recreating it for each search
 export let globalTriggerMap: Map<string, BangItem[]> | null = null;
@@ -13,6 +14,42 @@ export let globalTriggerMap: Map<string, BangItem[]> | null = null;
 export const bangFilterCache = new BangCache();
 
 export const FALLBACK_BANG_TRIGGER = "g";
+
+// Track if we have loaded the full database
+let isFullDatabaseLoaded = false;
+let currentBaseBangs: BangItem[] = topBangs;
+
+/**
+ * Loads the full bang database if not already loaded
+ */
+export async function ensureFullDatabase(): Promise<void> {
+  if (isFullDatabaseLoaded) return;
+  
+  try {
+    const fullBangs = await loadAllBangs();
+    currentBaseBangs = fullBangs;
+    isFullDatabaseLoaded = true;
+    
+    // Clear caches so they rebuild with the full list
+    clearBangFilterCache();
+    console.log("Full bang database loaded (" + fullBangs.length + " items)");
+  } catch (e) {
+    console.error("Failed to ensure full database", e);
+  }
+}
+
+/**
+ * Get all available bangs (base + custom)
+ */
+export function getCombinedBangs(): BangItem[] {
+  const settings = loadSettings();
+  if (!settings.customBangs || settings.customBangs.length === 0) {
+    return currentBaseBangs;
+  }
+
+  // Use the utility function to combine bangs
+  return combineBangs(currentBaseBangs, settings.customBangs);
+}
 
 /**
  * Create a map of all bang triggers for fast lookup
@@ -45,7 +82,7 @@ export function createTriggerMap(bangs: BangItem[]): Map<string, BangItem[]> {
 export function getGlobalTriggerMap(): Map<string, BangItem[]> {
   // If we don't have a trigger map yet, create one
   if (!globalTriggerMap)
-    globalTriggerMap = createTriggerMap(getCombinedBangsFromSettings());
+    globalTriggerMap = createTriggerMap(getCombinedBangs());
   
   return globalTriggerMap;
 }
@@ -82,14 +119,13 @@ export function clearBangFilterCache(): void {
 }
   
 export function determineBangUsed(bangCandidate: string, defaultBang: BangItem): BangItem {
-  //This is just a wrapper, so lets dig deeper.
-return findBang(bangCandidate) ?? defaultBang;
+  return findBang(bangCandidate) ?? defaultBang;
 }
 
 export function determineBangCandidate(query: string, defaultBang: BangItem): string {
-const match = query.match(/!(\S+)/i);
-const matchBangTrigger = match?.[1]?.toLowerCase();
-const defaultBangFirstTrigger = Array.isArray(defaultBang?.t) ? defaultBang?.t[0] : defaultBang?.t
+    const match = query.match(/!(\S+)/i);
+    const matchBangTrigger = match?.[1]?.toLowerCase();
+    const defaultBangFirstTrigger = Array.isArray(defaultBang?.t) ? defaultBang?.t[0] : defaultBang?.t
 
-return matchBangTrigger ?? defaultBangFirstTrigger ?? FALLBACK_BANG_TRIGGER;
+    return matchBangTrigger ?? defaultBangFirstTrigger ?? FALLBACK_BANG_TRIGGER;
 }

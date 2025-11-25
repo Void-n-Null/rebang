@@ -62,7 +62,7 @@ export class MainModal extends BaseModal {
         
         // Create footer container - Ensure it doesn't shrink
         this.footerElement = createElement('div', {
-            className: 'bg-black/30 px-6 flex justify-end gap-2 flex-shrink-0'
+            className: 'bg-black/40 px-6 py-4 flex justify-between items-center gap-2 flex-shrink-0 border-t border-white/5'
         });
         
         // Assemble modal using the flex layout
@@ -85,11 +85,11 @@ export class MainModal extends BaseModal {
     
     private createHeader(): HTMLDivElement {
         const header = createElement('div', {
-            className: 'bg-gradient-to-r from-[#2a004d] to-[#1a0036] px-6 py-4 flex justify-between items-center'
+            className: 'bg-gradient-to-r from-[#4c1d95] to-[#2e1065] px-6 py-4 flex justify-between items-center border-b border-white/10'
         });
         
         const title = createElement('h2', {
-            className: 'text-white text-xl font-bold'
+            className: 'text-white text-xl font-bold tracking-tight'
         });
         title.textContent = this.config.title;
         
@@ -97,7 +97,7 @@ export class MainModal extends BaseModal {
         
         if (this.config.showCloseButton) {
             const closeButton = createElement('button', {
-                className: 'w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white text-xl font-medium transition-all'
+                className: 'w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white text-xl transition-all'
             });
             closeButton.textContent = '×';
             closeButton.addEventListener('click', () => {
@@ -169,7 +169,7 @@ export class MainModal extends BaseModal {
         
         // Add text
         const helpText = createElement('p', {
-            className: 'text-white/70 text-sm italic'
+            className: 'text-white/50 text-xs'
         });
         helpText.textContent = text;
         

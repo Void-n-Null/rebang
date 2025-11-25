@@ -3,7 +3,7 @@ import { loadSettings } from "./settings";
 import { showRedirectLoadingScreen } from "../components/RedirectLoadingScreen";
 import { BangItem } from "../types/BangItem";
 import { getParametersFromUrl, validateRedirectUrl, getBaseDomain } from "./urlUtils"; 
-import { determineBangCandidate, determineBangUsed, getBangFirstTrigger } from "./bangCoreUtil";
+import { determineBangCandidate, determineBangUsed, getBangFirstTrigger, ensureFullDatabase, getBangFirstTrigger as getTrigger } from "./bangCoreUtil";
 import { findDefaultBangFromSettings } from "./bangSettingsUtil";
 
 /**
@@ -21,7 +21,7 @@ export type BangRedirectResult = {
  * Get the redirect URL based on the bang and query
  * Refresh settings each time to ensure we have the latest
  */
-function getRedirect(urlParams: URLSearchParams): BangRedirectResult {
+async function getRedirect(urlParams: URLSearchParams): Promise<BangRedirectResult> {
   try {
     const query = urlParams.get("q") || "";
     if (!query) return { success: false, error: "No query parameter found" };
@@ -31,10 +31,25 @@ function getRedirect(urlParams: URLSearchParams): BangRedirectResult {
 
     //This function is fast. It's just a regex to extract the bang trigger.
     const bangCandidate: string = determineBangCandidate(query, defaultBang);
-    const selectedBang: BangItem = determineBangUsed(bangCandidate, defaultBang);
+    
+    // First attempt: Try with current loaded bangs (Top 500)
+    let selectedBang: BangItem = determineBangUsed(bangCandidate, defaultBang);
+    let selectedTrigger = getTrigger(selectedBang);
 
-    //
-    const bangName = getBangFirstTrigger(selectedBang);
+    // Check if we missed the requested bang
+    // If the candidate we extracted (e.g. "obscure") is different from the one we found (e.g. "g"),
+    // then we failed to find the specific bang the user asked for.
+    // In that case, we should load the full database and try again.
+    if (bangCandidate !== selectedTrigger) {
+        console.log(`Bang '!${bangCandidate}' not found in top list. Loading full database...`);
+        await ensureFullDatabase();
+        
+        // Retry with full database
+        selectedBang = determineBangUsed(bangCandidate, defaultBang);
+        selectedTrigger = getTrigger(selectedBang);
+    }
+
+    const bangName = selectedTrigger;
 
     // Remove the first bang from the query
     const cleanQuery = query.replace(/!\S+\s*/i, "").trim();
@@ -84,18 +99,20 @@ function getRedirect(urlParams: URLSearchParams): BangRedirectResult {
  * Redirect the browser to the appropriate search URL
  * This is the main function that should be used to redirect the user.
  */
-export function performRedirect(): boolean {
+export async function performRedirect(): Promise<boolean> {
   try {
     const urlParams = getParametersFromUrl(window.location.href);
-    // If recursive parameter is true, don't redirect
-    if (urlParams.get("recursive") === "true") return false;
 
-    const redirect = getRedirect(urlParams);
+    const redirect = await getRedirect(urlParams);
 
     if (!redirect.success || !redirect.url) return false;
 
     const url = redirect.url;
     
+    // Benchmark: Calculate time from navigation start to now
+    const now = performance.now();
+    console.log(`[ReBang Benchmark] Time to calculate redirect: ${now.toFixed(2)}ms`);
+
     const bangName = redirect.bangUsed || "search";
     if (loadSettings().showRedirectLoadingScreen) {
     showRedirectLoadingScreen(bangName, url)
