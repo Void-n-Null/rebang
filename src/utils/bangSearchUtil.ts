@@ -6,39 +6,66 @@ import { bangFilterCache, getGlobalTriggerMap } from "./bangCoreUtil";
 export const MAX_FILTERED_ITEMS = 35;
 
 /**
+ * Reserved triggers for the ReBang settings/home page
+ * These always point to the current origin and override any other bangs
+ */
+export const RESERVED_TRIGGERS = ['home', 'rebang', 'settings', 'bang', 'bangs'];
+
+/**
+ * Creates the special "home" bang that points to the current origin
+ * This is dynamically generated so it works on localhost, rebang.online, etc.
+ */
+export function getHomeBang(): BangItem {
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://rebang.online';
+  return {
+    t: RESERVED_TRIGGERS,
+    s: 'ReBang Settings',
+    d: origin.replace(/^https?:\/\//, ''),
+    c: 'Online Services',
+    r: 9999999, // Highest priority
+    u: origin
+  };
+}
+
+/**
  * Combines custom bangs with default bangs, ensuring custom bangs override defaults with the same triggers
+ * Also adds a special "home" bang for ReBang settings that takes highest priority
  * 
  * @param defaultBangs Array of default bang items
  * @param customBangs Array of custom bang items that should override defaults
  * @returns Combined array with custom bangs taking precedence
  */
 export function combineBangs(defaultBangs: BangItem[], customBangs: BangItem[] = []): BangItem[] {
-  if (!customBangs || customBangs.length === 0) {
-    return defaultBangs;
-  }
+  // Create the home bang that points to current origin
+  const homeBang = getHomeBang();
+  const reservedSet = new Set(RESERVED_TRIGGERS.map(t => t.toLowerCase()));
 
   // Create a map of custom bangs by trigger for quick lookup
   const customBangMap = new Map<string, BangItem>();
   
-  // Track custom bangs by their triggers
+  // Track custom bangs by their triggers (excluding reserved triggers)
   customBangs.forEach((bang: BangItem) => {
-    // Handle both string and array of triggers
     const triggers = Array.isArray(bang.t) ? bang.t : [bang.t];
     triggers.forEach((trigger: string) => {
-      customBangMap.set(trigger, bang);
+      // Don't allow custom bangs to override reserved triggers
+      if (!reservedSet.has(trigger.toLowerCase())) {
+        customBangMap.set(trigger.toLowerCase(), bang);
+      }
     });
   });
 
-  // Filter out default bangs that have been overridden by custom bangs
+  // Filter out default bangs that have been overridden by custom bangs OR use reserved triggers
   const filteredDefaultBangs = defaultBangs.filter(bang => {
-    // Handle both string and array of triggers
     const triggers = Array.isArray(bang.t) ? bang.t : [bang.t];
-    // If any trigger from this bang is overridden by a custom bang, exclude it
-    return !triggers.some(trigger => customBangMap.has(trigger));
+    // Exclude if any trigger is reserved or overridden by custom bang
+    return !triggers.some(trigger => 
+      reservedSet.has(trigger.toLowerCase()) || 
+      customBangMap.has(trigger.toLowerCase())
+    );
   });
 
-  // Combine the filtered default bangs with custom bangs
-  return [...filteredDefaultBangs, ...customBangs];
+  // Combine: home bang first (highest priority), then custom bangs, then defaults
+  return [homeBang, ...customBangs, ...filteredDefaultBangs];
 }
 
 /**

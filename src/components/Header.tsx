@@ -1,43 +1,48 @@
-import { useState } from 'react';
-// We'll implement the modals later
-// import { AboutModal } from './AboutModal';
-// import { SettingsModal } from './SettingsModal';
-// import { CustomBangsModal } from './CustomBangsModal';
+import { Settings, HelpCircle, Plus } from 'lucide-react';
+import { Button } from './ui';
 
 export function Header() {
   return (
-    <div className="mb-6 flex flex-col items-center">
-      <h2 className="text-white text-lg sm:text-xl md:text-2xl font-light text-center tracking-wider">
-        Start Searching with a !Bang
-      </h2>
+    <div className="space-y-4">
+      {/* Tagline */}
+      <p className="text-muted-foreground text-base sm:text-lg font-light tracking-wide">
+        Search with <span className="text-primary font-mono font-medium">!bangs</span> — instantly
+      </p>
       
-      <div className="flex items-center justify-between w-full mt-2 px-4">
-        <button 
-          className="text-white/50 hover:text-white/90 transition-colors px-3 py-1 rounded-full hover:bg-white/10 flex items-center gap-1"
-          onClick={() => alert("Custom Bangs coming soon in React rewrite!")}
+      {/* Action buttons */}
+      <div className="flex items-center justify-center gap-2">
+        <Button 
+          variant="ghost" 
+          size="sm"
+          className="text-muted-foreground hover:text-foreground gap-1.5"
+          onClick={() => alert("Custom Bangs coming soon!")}
         >
-          My Bangs <span>+</span>
-        </button>
+          <Plus className="h-4 w-4" />
+          <span className="hidden sm:inline">My Bangs</span>
+        </Button>
         
-        <div className="flex items-center gap-2">
-          <button 
-            className="text-white/50 hover:text-white/90 transition-colors w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 font-bold text-xl"
-            title="About !ReBang"
-            onClick={() => alert("About Modal coming soon!")}
-          >
-            ?
-          </button>
-          <button 
-            className="text-white/50 hover:text-white/90 transition-colors w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10"
-            title="Settings"
-            onClick={() => alert("Settings coming soon!")}
-          >
-            <img src="/gear-black.svg" alt="Settings" className="w-6 h-6 opacity-80 filter invert" />
-          </button>
-        </div>
+        <div className="w-px h-4 bg-border" />
+        
+        <Button 
+          variant="ghost" 
+          size="icon"
+          className="text-muted-foreground hover:text-foreground h-9 w-9"
+          title="About ReBang"
+          onClick={() => alert("About Modal coming soon!")}
+        >
+          <HelpCircle className="h-4 w-4" />
+        </Button>
+        
+        <Button 
+          variant="ghost" 
+          size="icon"
+          className="text-muted-foreground hover:text-foreground h-9 w-9"
+          title="Settings"
+          onClick={() => alert("Settings coming soon!")}
+        >
+          <Settings className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );
 }
-
-

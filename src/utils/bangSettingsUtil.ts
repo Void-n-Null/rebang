@@ -15,8 +15,8 @@ export function findDefaultBangFromSettings(): BangItem {
     return {
       t: ["g"],
       s: "Google",
-      d: "Google Search",
-      u: "https://www.google.com/search?q={{{s}}}",
+      d: "google.com",
+      u: "https://www.google.com/search?q=%s",
       r: 1000 // High relevance score
     };
   }

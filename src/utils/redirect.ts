@@ -33,22 +33,22 @@ async function getRedirect(urlParams: URLSearchParams): Promise<BangRedirectResu
     
     // First attempt: Try with current loaded bangs (Top 500)
     let selectedBang: BangItem = determineBangUsed(bangCandidate, defaultBang);
-    let selectedTrigger = getBangFirstTrigger(selectedBang);
+    
+    // Check if we actually found the requested bang
+    // We need to check if the candidate matches ANY of the bang's triggers, not just the first one
+    const selectedTriggers = Array.isArray(selectedBang.t) ? selectedBang.t : [selectedBang.t];
+    const foundRequestedBang = selectedTriggers.some(t => t.toLowerCase() === bangCandidate.toLowerCase());
 
-    // Check if we missed the requested bang
-    // If the candidate we extracted (e.g. "obscure") is different from the one we found (e.g. "g"),
-    // then we failed to find the specific bang the user asked for.
-    // In that case, we should load the full database and try again.
-    if (bangCandidate !== selectedTrigger) {
+    // If we didn't find the specific bang the user asked for, load the full database
+    if (!foundRequestedBang) {
         console.log(`Bang '!${bangCandidate}' not found in top list. Loading full database...`);
         await ensureFullDatabase();
         
         // Retry with full database
         selectedBang = determineBangUsed(bangCandidate, defaultBang);
-        selectedTrigger = getBangFirstTrigger(selectedBang);
     }
 
-    const bangName = selectedTrigger;
+    const bangName = getBangFirstTrigger(selectedBang);
 
     // Remove the first bang from the query
     const cleanQuery = query.replace(/!\S+\s*/i, "").trim();

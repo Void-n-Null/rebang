@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef, FormEvent } from 'react';
+import { Search, Loader2 } from 'lucide-react';
 import { ensureFullDatabase, getCombinedBangs, hasFullDatabaseLoaded } from '../utils/bangCoreUtil';
 import { filterAndSortBangs } from '../utils/bangSearchUtil';
 import { performRedirect } from '../utils/redirect';
 import { BangItem } from '../types/BangItem';
+import { Button, Badge, Input } from './ui';
+import { cn } from '@/lib/utils';
 
 export function SearchForm() {
   const [query, setQuery] = useState('');
@@ -10,9 +13,31 @@ export function SearchForm() {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isLoadingBangs, setIsLoadingBangs] = useState(false);
+  const [maxDropdownHeight, setMaxDropdownHeight] = useState(300);
   
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Calculate available space for dropdown
+  useEffect(() => {
+    const calculateMaxHeight = () => {
+      if (formRef.current) {
+        const formRect = formRef.current.getBoundingClientRect();
+        const inputBottom = formRect.bottom;
+        const viewportHeight = window.innerHeight;
+        const footerBuffer = 80; // Space for footer
+        const dropdownMargin = 8; // mt-2 margin
+        const available = viewportHeight - inputBottom - footerBuffer - dropdownMargin;
+        setMaxDropdownHeight(Math.max(150, Math.min(available, 400)));
+      }
+    };
+
+    calculateMaxHeight();
+    window.addEventListener('resize', calculateMaxHeight);
+    return () => window.removeEventListener('resize', calculateMaxHeight);
+  }, []);
 
   // Handle clicking outside to close dropdown
   useEffect(() => {
@@ -26,9 +51,21 @@ export function SearchForm() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    optionRefs.current = optionRefs.current.slice(0, suggestions.length);
+  }, [suggestions]);
+
+  useEffect(() => {
+    if (selectedIndex >= 0 && optionRefs.current[selectedIndex]) {
+      optionRefs.current[selectedIndex]?.scrollIntoView({
+        block: 'nearest',
+        behavior: 'smooth',
+      });
+    }
+  }, [selectedIndex]);
+
   // Search logic
   useEffect(() => {
-    // Check if query ends with a potential bang trigger
     const bangMatch = query.match(/!([a-zA-Z0-9]*)$/);
     let isCancelled = false;
     
@@ -77,7 +114,6 @@ export function SearchForm() {
     if (selectedIndex >= 0 && suggestions[selectedIndex]) {
       selectBang(suggestions[selectedIndex]);
     } else {
-      // Normal submit
       const newUrl = `${window.location.origin}?q=${encodeURIComponent(query)}`;
       history.pushState({ query }, '', newUrl);
       performRedirect();
@@ -86,9 +122,8 @@ export function SearchForm() {
 
   const selectBang = (bang: BangItem) => {
     const trigger = Array.isArray(bang.t) ? bang.t[0] : bang.t;
-    // Replace the last word (the partial bang) with the selected bang
     const parts = query.split(' ');
-    parts.pop(); // Remove partial
+    parts.pop();
     const newQuery = [...parts, `!${trigger} `].join(' ');
     
     setQuery(newQuery);
@@ -106,86 +141,113 @@ export function SearchForm() {
       e.preventDefault();
       setSelectedIndex(prev => (prev - 1 + suggestions.length) % suggestions.length);
     } else if (e.key === 'Tab') {
-        e.preventDefault();
-        const index = selectedIndex >= 0 ? selectedIndex : 0;
-        selectBang(suggestions[index]);
+      e.preventDefault();
+      const index = selectedIndex >= 0 ? selectedIndex : 0;
+      selectBang(suggestions[index]);
     } else if (e.key === 'Enter') {
-        if (selectedIndex >= 0) {
-            e.preventDefault();
-            selectBang(suggestions[selectedIndex]);
-        }
+      if (selectedIndex >= 0) {
+        e.preventDefault();
+        selectBang(suggestions[selectedIndex]);
+      }
     } else if (e.key === 'Escape') {
       setShowDropdown(false);
     }
   };
 
   return (
-    <div className="w-full mt-10 pt-6 border-t border-white/10 relative">
-      <form onSubmit={handleSubmit} className="relative">
-        <input
-          ref={inputRef}
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Search with a !bang..."
-          className="w-full bg-black/20 border border-white/10 rounded-xl px-6 py-4 text-lg text-white placeholder-white/30 focus:outline-none focus:border-[#3a86ff] focus:ring-1 focus:ring-[#3a86ff] transition-all shadow-inner"
-          autoFocus
-        />
-        
-        <div className="absolute right-4 top-1/2 -translate-y-1/2">
-            <button type="submit" className="p-2 bg-[#3a86ff] rounded-full hover:bg-[#2a76ef] transition-colors">
-                <img src="/search.svg" alt="Search" className="w-5 h-5" />
-            </button>
+    <div className="relative space-y-6">
+      {/* Search input */}
+      <form ref={formRef} onSubmit={handleSubmit} className="relative">
+        <div className="relative group">
+          <Input
+            ref={inputRef}
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Type !g for Google, !yt for YouTube..."
+            className="pr-14 h-14 text-base sm:text-lg bg-background/50 border-border/50 focus:border-primary/50 focus:bg-background/80 focus:outline-none focus:ring-0 focus:ring-offset-0 shadow-none"
+            autoFocus
+          />
+          
+          <div className="absolute right-2 top-1/2 -translate-y-1/2">
+            <Button 
+              type="submit" 
+              size="icon"
+              className="bg-transparent border-none shadow-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none"
+            >
+              {isLoadingBangs ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <img src="/ReBangLogoSillo.png" alt="ReBang" className="group-hover:scale-110 transition-transform duration-300 h-7 w-7" />
+              )}
+            </Button>
+          </div>
         </div>
 
+        {/* Dropdown */}
         {showDropdown && suggestions.length > 0 && (
           <div 
             ref={dropdownRef}
-            className="absolute left-0 right-0 top-full mt-2 bg-[#180a22]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 max-h-[60vh] overflow-y-auto"
+            className="absolute left-0 right-0 top-full mt-2 bg-card/95 backdrop-blur-xl border border-border/50 rounded-xl shadow-2xl overflow-hidden z-50 overflow-y-auto scrollbar-thin"
+            style={{ maxHeight: `${maxDropdownHeight}px` }}
           >
-            {suggestions.map((bang, index) => (
-              <div
-                key={`${bang.s}-${index}`}
-                className={`px-4 py-3 cursor-pointer flex items-center justify-between transition-colors ${
-                  index === selectedIndex ? 'bg-[#3a86ff]/20 border-l-4 border-[#3a86ff]' : 'hover:bg-white/5 border-l-4 border-transparent'
-                }`}
-                onClick={() => selectBang(bang)}
-                onMouseEnter={() => setSelectedIndex(index)}
-              >
-                <div className="flex items-center gap-3 overflow-hidden">
-                    <span className="font-mono text-[#3a86ff] font-bold min-w-[3ch]">!{bang.t}</span>
-                    <span className="text-white font-medium truncate">{bang.s}</span>
+            {suggestions.map((bang, index) => {
+              const trigger = Array.isArray(bang.t) ? bang.t[0] : bang.t;
+              return (
+                <div
+                  key={`${bang.s}-${index}`}
+                  ref={(el) => {
+                    optionRefs.current[index] = el;
+                  }}
+                  className={cn(
+                    "px-4 py-3 cursor-pointer flex items-center justify-between transition-colors",
+                    index === selectedIndex 
+                      ? "bg-primary/10 border-l-2 border-primary" 
+                      : "hover:bg-secondary/50 border-l-2 border-transparent"
+                  )}
+                  onClick={() => selectBang(bang)}
+                  onMouseEnter={() => setSelectedIndex(index)}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="font-mono text-primary font-semibold shrink-0">
+                      !{trigger}
+                    </span>
+                    <span className="text-foreground truncate">
+                      {bang.s}
+                    </span>
+                  </div>
+                  <span className="text-xs text-muted-foreground shrink-0 ml-2">
+                    {bang.c}
+                  </span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-white/40 whitespace-nowrap">
-                    <span>{bang.c}</span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </form>
 
-      <div className="mt-8 flex flex-wrap justify-center gap-3">
-        <BangBadge name="!g" desc="Google" onClick={() => window.location.href = '/?q=!g'} />
-        <BangBadge name="!yt" desc="YouTube" onClick={() => window.location.href = '/?q=!yt'} />
-        <BangBadge name="!w" desc="Wikipedia" onClick={() => window.location.href = '/?q=!w'} />
-        <BangBadge name="!gh" desc="GitHub" onClick={() => window.location.href = '/?q=!gh'} />
+      {/* Quick access bangs */}
+      <div className="flex flex-wrap justify-center gap-2">
+        <QuickBang trigger="g" name="Google" />
+        <QuickBang trigger="yt" name="YouTube" />
+        <QuickBang trigger="w" name="Wikipedia" />
+        <QuickBang trigger="gh" name="GitHub" />
+        <QuickBang trigger="r" name="Reddit" />
       </div>
     </div>
   );
 }
 
-function BangBadge({ name, desc, onClick }: { name: string, desc: string, onClick: () => void }) {
-    return (
-        <button 
-            onClick={onClick}
-            className="inline-flex items-center px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/70 text-xs hover:bg-white/10 hover:text-white hover:border-[#3a86ff]/50 transition-all cursor-pointer"
-        >
-            <span className="font-mono font-bold text-[#3a86ff] mr-1.5">{name}</span>
-            {desc}
-        </button>
-    );
+function QuickBang({ trigger, name }: { trigger: string; name: string }) {
+  return (
+    <Badge 
+      variant="bang"
+      className="cursor-pointer select-none"
+      onClick={() => window.location.href = `/?q=!${trigger}`}
+    >
+      <span className="font-semibold">!{trigger}</span>
+      <span className="text-muted-foreground ml-1">{name}</span>
+    </Badge>
+  );
 }
-
-

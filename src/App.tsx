@@ -1,41 +1,41 @@
-import { useEffect, useState } from 'react';
-import { performRedirect } from './utils/redirect';
-import { SearchForm } from './components/SearchForm'; // We will create this
-import { Footer } from './components/Footer';         // We will create this
-import { Header } from './components/Header';         // We will create this
-import { Logo } from './components/Logo';             // We will create this
+import { SearchForm } from './components/SearchForm';
+import { Footer } from './components/Footer';
+import { Header } from './components/Header';
+import { Logo } from './components/Logo';
 
+/**
+ * Main App component - only rendered when NOT redirecting
+ * Redirect logic is handled in main.tsx BEFORE React loads
+ */
 function App() {
-  const [isRedirecting, setIsRedirecting] = useState(true);
-
-  useEffect(() => {
-    const checkRedirect = async () => {
-      const redirected = await performRedirect();
-      if (!redirected) {
-        setIsRedirecting(false);
-      }
-    };
-    checkRedirect();
-  }, []);
-
-  if (isRedirecting) {
-    // Optional: Show a loading spinner here if you want, 
-    // or just return null to keep it blank/fast.
-    return null; 
-  }
-
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8 bg-[#180a22] text-white">
-      <div className="w-full max-w-7xl text-center p-6 md:p-10 bg-black/15 backdrop-blur-xl rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.25)] border border-white/10 animate-fade-in">
-        <Logo />
-        <Header />
-        <SearchForm />
-      </div>
+    <div className="mesh-gradient grain h-screen flex flex-col overflow-hidden">
+      {/* Main content area */}
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-8 sm:py-12 min-h-0">
+        <div className="w-full max-w-2xl flex flex-col min-h-0">
+          {/* Hero section with logo and header */}
+          <div className="text-center mb-6 sm:mb-8 animate-fade-up shrink-0">
+            <Logo />
+            <Header />
+          </div>
+          
+          {/* Search section with glass card effect */}
+          <div 
+            className="relative rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl p-6 sm:p-8 shadow-2xl animate-fade-up shrink-0"
+            style={{ animationDelay: '100ms' }}
+          >
+            {/* Subtle gradient border glow */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-primary/10 via-transparent to-transparent pointer-events-none" />
+            
+            <SearchForm />
+          </div>
+        </div>
+      </main>
+      
+      {/* Footer */}
       <Footer />
     </div>
   );
 }
 
 export default App;
-
-

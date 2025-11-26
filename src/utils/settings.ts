@@ -2,6 +2,17 @@
 
 import { BangItem } from "../types/BangItem";
 
+// Callback to notify when custom bangs change (set by bangCoreUtil)
+let onCustomBangsChanged: (() => void) | null = null;
+
+/**
+ * Register a callback to be called when custom bangs are modified
+ * This allows the bang cache to be invalidated when settings change
+ */
+export function setCustomBangsChangedCallback(callback: () => void): void {
+  onCustomBangsChanged = callback;
+}
+
 // Settings interface that defines all available user preferences
 export interface UserSettings {
   defaultBang?: string;  // The user's preferred default bang (e.g., "g" for Google)
@@ -27,6 +38,10 @@ const SETTINGS_STORAGE_KEY = 'rebang_settings';
  */
 export function saveSettings(settings: UserSettings, expirationDays = 365): void {
   try {
+    // Check if custom bangs changed
+    const oldSettings = loadSettings();
+    const customBangsChanged = JSON.stringify(oldSettings.customBangs) !== JSON.stringify(settings.customBangs);
+    
     // Add expiration timestamp if specified
     const expirationTimestamp = expirationDays > 0 
       ? Date.now() + (expirationDays * 24 * 60 * 60 * 1000)
@@ -38,6 +53,11 @@ export function saveSettings(settings: UserSettings, expirationDays = 365): void
     };
     
     localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(dataToStore));
+    
+    // Notify listeners if custom bangs changed (invalidates bang cache)
+    if (customBangsChanged && onCustomBangsChanged) {
+      onCustomBangsChanged();
+    }
   } catch (error) {
     console.error('Failed to save settings:', error);
   }

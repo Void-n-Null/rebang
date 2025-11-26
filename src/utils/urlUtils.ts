@@ -17,7 +17,8 @@ export function validateRedirectUrl(url: string): boolean {
 export function getBaseDomain(urlPattern: string): string {
   try {
     const url = new URL(urlPattern);
-    return `${url.protocol}//${url.hostname}`;
+    // Include port if present (important for localhost:5173, etc.)
+    return url.origin;
   } catch (error) {
     console.error("Failed to parse URL:", urlPattern);
     return urlPattern;

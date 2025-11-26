@@ -2,21 +2,103 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+@layer base {
+  :root {
+    /* Deep space theme with electric cyan accent */
+    --background: 270 50% 5%;
+    --foreground: 0 0% 98%;
+    
+    --card: 270 40% 8%;
+    --card-foreground: 0 0% 98%;
+    
+    --primary: 190 100% 50%;
+    --primary-foreground: 270 50% 5%;
+    
+    --secondary: 270 30% 15%;
+    --secondary-foreground: 0 0% 98%;
+    
+    --muted: 270 20% 18%;
+    --muted-foreground: 270 10% 60%;
+    
+    --accent: 320 100% 60%;
+    --accent-foreground: 0 0% 98%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 270 20% 18%;
+    --input: 270 20% 15%;
+    --ring: 190 100% 50%;
+    
+    --bang: 190 100% 50%;
+    --bang-glow: 190 100% 60%;
+    
+    --radius: 0.75rem;
   }
 }
 
-/* Custom classes */
-@layer components {
-  .fade-in {
-    animation: fadeIn 0.6s ease-out forwards;
+@layer base {
+  * {
+    @apply border-border;
   }
-} 
+  
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Subtle grain texture overlay */
+.grain::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.015;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  z-index: 9999;
+}
+
+/* Gradient mesh background */
+.mesh-gradient {
+  background: 
+    radial-gradient(ellipse at 20% 20%, hsl(var(--bang) / 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, hsl(var(--accent) / 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, hsl(270 50% 8%) 0%, hsl(270 50% 3%) 100%);
+}
+
+/* Custom scrollbar */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted)) transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted));
+    border-radius: 3px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.5);
+  }
+}
+
+/* Glow text effect */
+.text-glow {
+  text-shadow: 0 0 20px hsl(var(--bang) / 0.5), 0 0 40px hsl(var(--bang) / 0.3);
+}
+
+/* Focus ring utility */
+.focus-ring {
+  @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+}

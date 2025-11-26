@@ -1,15 +1,17 @@
 export function Logo() {
   return (
-    <div className="mb-8 flex justify-center">
-      <a href="/" className="block transition-transform hover:scale-105 duration-300">
+    <a 
+      href="/" 
+      className="inline-block group"
+    >
+      <div className="relative">
+
         <img 
           src="/ReBangLogoSillo.png" 
-          alt="ReBang Logo" 
-          className="h-24 md:h-32 w-auto drop-shadow-[0_0_15px_rgba(58,134,255,0.5)]"
+          alt="ReBang" 
+          className="relative h-20 sm:h-28 w-auto drop-shadow-2xl transition-transform duration-300 group-hover:scale-105"
         />
-      </a>
-    </div>
+      </div>
+    </a>
   );
 }
-
-

@@ -3,8 +3,8 @@
 import { BangItem } from "../types/BangItem";
 import { BangCache } from "./BangCache";
 import { bangWorker } from "./workerUtils";
-import { loadSettings } from "./settings";
-import { combineBangs } from "./bangSearchUtil";
+import { loadSettings, setCustomBangsChangedCallback } from "./settings";
+import { combineBangs, getHomeBang } from "./bangSearchUtil";
 import { topBangs, loadAllBangs } from "../bang";
 
 // Global trigger map cache to avoid recreating it for each search
@@ -46,16 +46,13 @@ export async function ensureFullDatabase(): Promise<void> {
 }
 
 /**
- * Get all available bangs (base + custom)
+ * Get all available bangs (base + custom + home bang)
+ * The home bang is always included and has highest priority
  */
 export function getCombinedBangs(): BangItem[] {
   const settings = loadSettings();
-  if (!settings.customBangs || settings.customBangs.length === 0) {
-    return currentBaseBangs;
-  }
-
-  // Use the utility function to combine bangs
-  return combineBangs(currentBaseBangs, settings.customBangs);
+  // Always use combineBangs to ensure home bang is included
+  return combineBangs(currentBaseBangs, settings.customBangs || []);
 }
 
 /**
@@ -136,3 +133,10 @@ const defaultBangFirstTrigger = Array.isArray(defaultBang?.t) ? defaultBang?.t[0
 
 return matchBangTrigger ?? defaultBangFirstTrigger ?? FALLBACK_BANG_TRIGGER;
 }
+
+// Register callback to clear cache when custom bangs change
+// This must be at the end after clearBangFilterCache is defined
+setCustomBangsChangedCallback(() => {
+  console.log("Custom bangs changed, clearing cache...");
+  clearBangFilterCache();
+});

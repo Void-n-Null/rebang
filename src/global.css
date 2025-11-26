@@ -1,42 +1,25 @@
-/* @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"); */
-
-/* Font fallback that closely matches Inter metrics */
+/* Font fallback that closely matches Outfit metrics */
 @font-face {
-  font-family: "Inter Fallback";
-  size-adjust: 107%;
+  font-family: "Outfit Fallback";
+  size-adjust: 100%;
   ascent-override: 90%;
   src: local("Arial");
 }
 
+@font-face {
+  font-family: "JetBrains Mono Fallback";
+  size-adjust: 100%;
+  src: local("Courier New");
+}
 
 :root {
-  --primary-color: #3a86ff;
-  --primary-hover: #2d79fe;
-  --accent-color: #ff006e;
-  --text-color: #333333;
-  --text-light: #666666;
-  --bg-color: #ffffff;
-  --bg-light: #f8f9fa;
-  --border-color: #e0e0e0;
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --transition: all 0.2s ease;
-
   font-family:
-    Inter,
-    "Inter Fallback",
+    Outfit,
+    "Outfit Fallback",
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
     "Segoe UI",
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    "Open Sans",
-    "Helvetica Neue",
     sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -54,255 +37,31 @@ html,
 body {
   height: 100%;
   width: 100%;
-  background-color: var(--bg-color);
 }
 
 body {
   line-height: 1.6;
   font-weight: 400;
   font-size: 16px;
-  color: var(--text-color);
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 600;
-  line-height: 1.3;
-  color: var(--text-color);
-  margin-bottom: 1rem;
+/* Selection styling */
+::selection {
+  background-color: hsl(190 100% 50% / 0.3);
+  color: inherit;
 }
 
-h1 {
-  font-size: 2.5rem;
-  margin-bottom: 1.2rem;
-  background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
+/* Focus visible for accessibility on interactive elements */
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid hsl(190 100% 50%);
+  outline-offset: 2px;
 }
 
-h2 {
-  font-size: 1.75rem;
-  margin-bottom: 1rem;
-}
-
-p {
-  margin-bottom: 1.2rem;
-}
-
-a {
-  color: var(--primary-color);
-  text-decoration: none;
-  transition: var(--transition);
-}
-
-a:hover {
-  color: var(--primary-hover);
-  text-decoration: underline;
-}
-
-button {
-  font: inherit;
-  border: none;
-  background: none;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-input,
-textarea {
-  font: inherit;
-}
-
-/* Main container */
-.main-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 2rem 1rem;
-}
-
-/* Content container */
-.content-container {
-  max-width: 40rem;
-  width: 100%;
-  text-align: center;
-  padding: 2.5rem;
-  margin: 0 auto;
-  background-color: var(--bg-light);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-}
-
-/* URL Container */
-.url-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.url-input {
-  padding: 12px 16px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  width: 100%;
-  background: var(--bg-color);
-  transition: var(--transition);
-  font-size: 0.95rem;
-  box-shadow: var(--shadow-sm);
-}
-
-.url-input:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(58, 134, 255, 0.1);
-}
-
-.copy-button {
-  padding: 8px;
-  color: var(--text-light);
-  border-radius: var(--radius-sm);
-  transition: var(--transition);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--bg-color);
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
-}
-
-.copy-button:hover {
-  background: #f0f0f0;
-}
-
-.copy-button:active {
-  background: #e5e5e5;
-}
-
-.copy-button img {
-  width: 20px;
-  height: 20px;
-}
-
-/* Search Container */
-.search-container {
-  margin-top: 2.5rem;
-  width: 100%;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--border-color);
-}
-
-.search-form {
-  display: flex;
-  margin-top: 1rem;
-  margin-bottom: 0.75rem;
-  gap: 8px;
-}
-
-.search-input {
-  flex: 1;
-  padding: 12px 16px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  background: var(--bg-color);
-  transition: var(--transition);
-  min-width: 0;
-  box-shadow: var(--shadow-sm);
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(58, 134, 255, 0.1);
-}
-
-.search-button {
-  padding: 12px 20px;
-  background: var(--primary-color);
-  color: white;
-  border-radius: var(--radius-sm);
-  font-weight: 500;
-  transition: var(--transition);
-  box-shadow: var(--shadow-sm);
-}
-
-.search-button:hover {
-  background: var(--primary-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
-.search-button:active {
-  transform: translateY(0);
-}
-
-.search-info {
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--text-light);
-}
-
-/* Footer */
-.footer {
-  margin-top: 2rem;
-  text-align: center;
-  font-size: 0.875rem;
-  color: var(--text-light);
-  padding: 1rem;
-}
-
-.footer a {
-  color: var(--text-light);
-  text-decoration: none;
-  font-weight: 500;
-  transition: var(--transition);
-}
-
-.footer a:hover {
-  color: var(--text-color);
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-  .content-container {
-    padding: 1.5rem;
+/* Smooth scrolling */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
   }
-  
-  h1 {
-    font-size: 2rem;
-  }
-  
-  h2 {
-    font-size: 1.5rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .search-form {
-    flex-direction: column;
-  }
-  
-  .search-button {
-    width: 100%;
-  }
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.fade-in {
-  animation: fadeIn 0.6s ease-out forwards;
 }
