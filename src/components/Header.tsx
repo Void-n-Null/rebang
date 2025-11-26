@@ -3,10 +3,12 @@ import { Settings, HelpCircle, Plus } from 'lucide-react';
 import { Button } from './ui';
 import { CustomBangsModal } from './CustomBangsModal';
 import { SettingsModal } from './SettingsModal';
+import { AboutModal } from './AboutModal';
 
 export function Header() {
   const [isCustomBangsOpen, setIsCustomBangsOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
 
   return (
     <>
@@ -35,7 +37,7 @@ export function Header() {
             size="icon"
             className="text-muted-foreground hover:text-foreground h-9 w-9"
             title="About ReBang"
-            onClick={() => alert("About Modal coming soon!")}
+            onClick={() => setIsAboutOpen(true)}
           >
             <HelpCircle className="h-4 w-4" />
           </Button>
@@ -62,6 +64,12 @@ export function Header() {
       <SettingsModal
         open={isSettingsOpen}
         onOpenChange={setIsSettingsOpen}
+      />
+
+      {/* About Modal */}
+      <AboutModal
+        open={isAboutOpen}
+        onOpenChange={setIsAboutOpen}
       />
     </>
   );
