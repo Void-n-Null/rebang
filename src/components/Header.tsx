@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { Settings, HelpCircle, Plus } from 'lucide-react';
 import { Button } from './ui';
 import { CustomBangsModal } from './CustomBangsModal';
+import { SettingsModal } from './SettingsModal';
 
 export function Header() {
   const [isCustomBangsOpen, setIsCustomBangsOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   return (
     <>
@@ -43,7 +45,7 @@ export function Header() {
             size="icon"
             className="text-muted-foreground hover:text-foreground h-9 w-9"
             title="Settings"
-            onClick={() => alert("Settings coming soon!")}
+            onClick={() => setIsSettingsOpen(true)}
           >
             <Settings className="h-4 w-4" />
           </Button>
@@ -54,6 +56,12 @@ export function Header() {
       <CustomBangsModal 
         open={isCustomBangsOpen} 
         onOpenChange={setIsCustomBangsOpen} 
+      />
+
+      {/* Settings Modal */}
+      <SettingsModal
+        open={isSettingsOpen}
+        onOpenChange={setIsSettingsOpen}
       />
     </>
   );

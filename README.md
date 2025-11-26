@@ -1,130 +1,111 @@
-# **!ReBang**
+# !ReBang
 
 [![Live Site](https://img.shields.io/badge/Live_Site-!ReBang-blue?style=for-the-badge&logo=googlechrome&logoColor=white)](https://rebang.online)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](https://makeapullrequest.com)
 
-## [Rebang.Online](https://rebang.online)
+## [rebang.online](https://rebang.online)
 
-An enhanced, feature-rich fork of [unduck](https://github.com/t3dotgg/unduck) that makes DuckDuckGo's bang redirects lightning fast while adding powerful new features and a modern interface.
+A fast, modern bang redirect service that combines bangs from **DuckDuckGo** and **Kagi** into one unified, optimized database—with the ability to create your own custom bangs.
 
-## 🔥 NEW: Create Your Own Custom Bangs! 🔥
+![ReBang Interface](public/rebang_screenshot.png)
 
-**!ReBang** now lets you **create and manage your own custom bang shortcuts**! Tired of waiting for DuckDuckGo to add your favorite site? Take control and create your own bangs in seconds:
+## Features
 
-* **Create unlimited custom bangs** that work exactly like official ones
-* **Override existing bangs** with your preferred destinations
-* **Simple interface** to add, edit, and manage your custom collection
-* **Persistent storage** keeps your bangs available across sessions
-* **Seamless integration** with the existing bang system
+### 🚀 Instant Client-Side Redirects
+No server round-trip. Your searches redirect directly from your browser.
 
-## Modern, Intuitive Interface
+### 🔍 Combined Bang Database  
+ReBang merges bangs from both DuckDuckGo and Kagi, giving you access to the best of both worlds. Duplicates are intelligently merged so you get one clean trigger for each destination.
 
-**!ReBang** features a clean, modern UI that makes searching with bangs more enjoyable:
+### ⚡ Custom Bangs
+Create your own bang shortcuts to any website:
 
-![ReBang Interface Screenshot](public/screenshot.png)
+1. Click **"My Bangs"** on the homepage
+2. Add your trigger, name, and URL pattern (use `%s` for the search query)
+3. Your custom bangs work instantly and appear in autocomplete
 
-* Sleek, responsive design that works on all devices
-* Dark mode default
-* Visual feedback during searches
-* Easy access to **Custom Bangs** management
+Custom bangs are stored locally and override built-in bangs with the same trigger.
 
+### 💡 Smart Autocomplete
+Discover bangs as you type. Start with `!` and see matching options from the entire database, including your custom bangs.
 
-## Intelligent Search with Bang Discovery
+### ⚙️ Configurable Default Search
+Choose your default search engine from the Settings menu. When you search without a bang, ReBang uses your preferred engine.
 
-* **Bang autocomplete** - Discover new bangs as you type with intelligent suggestions
-* **Visual indicators** - See which bangs are available for your current query
-* **Instant feedback** - Know exactly where you'll be redirected before pressing Enter
-* **Custom bang integration** - Your custom bangs appear alongside official bangs in search results
+### 📦 Optimized Database
+The bang database is compressed using an array-based format with category lookup tables, reducing file size by ~35% compared to raw JSON. Only the top bangs are bundled inline—the full database loads on-demand.
 
+### 🔄 Monthly Updates
+An automated GitHub Actions workflow runs on the 1st of each month to:
+- Fetch the latest bangs from DuckDuckGo and Kagi
+- Merge and deduplicate entries
+- Generate a new content-hashed database file
+- Create a PR for review
 
-## Expanded Bang Collection
+## Comparison
 
-**!ReBang** goes beyond DuckDuckGo's bang collection:
+| Feature | DuckDuckGo | unduck | **ReBang** |
+|---------|------------|--------|------------|
+| Bang redirects | Server-side | Client-side | Client-side |
+| Custom bangs | ❌ | ❌ | ✅ |
+| Bang sources | DDG only | DDG only | DDG + Kagi |
+| Autocomplete | ✅ | ❌ | ✅ |
+| Default search config | ❌ | ❌ | ✅ |
+| Modern UI | ✅ | Minimal | ✅ |
+| No flash on redirect | ❌ | ✅ | ✅ |
+| Optimized database | ❌ | ❌ | ✅ |
+| Automated updates | N/A | ❌ | ✅ Monthly |
 
-* **Create your own bangs** - Add shortcuts to any website you frequently use
-* **AI-focused bangs** - Quickly access ChatGPT (`!chat`), Claude (`!claude`), Perplexity (`!perp`), and other AI assistants
-* **Curated collection** - Our bang list is regularly audited to remove dead links that DuckDuckGo hasn't maintained
-* **Community suggestions** - New bangs are added based on user requests and usage patterns
+## Setup
 
-## Clean, Optimized, FAST Bang Database
+### As Your Default Search Engine
 
-While DuckDuckGo boasts about their 13,000+ bangs, we've learned that nearly half of them don't work! **!ReBang** focuses on quality, ensuring every bang in our database:
-  * Points to a working website
-  * Uses the correct search URL format
-  * Is properly maintained and updated
+1. Add `https://rebang.online/?q=%s` as a custom search engine in your browser
+2. Set it as your default
+3. Search normally—include a bang like `!g`, `!yt`, `!w` anywhere in your query to redirect
 
-**!ReBang** dramatically improves on DuckDuckGo's bang database with a thorough cleanup and optimization:
+### Direct Use
 
-* **Removed 6,500+ dead bangs** - Eliminated bangs pointing to:
-  * Websites that no longer exist (over 4,900 dead domains!)
-  * Search functions that have been deprecated or changed
-  * Redirects that lead nowhere or to unexpected destinations
-  
-* **Eliminated massive redundancy** - DuckDuckGo artificially inflated their bang count with duplicates:
-  * **German Amazon alone had 10+ different bangs** (`!amazonde`, `!amazonger`, `!amazondeutschland`, `!amazong`, etc.) all pointing to the exact same URL
-  * Countless sites had 5-6 different bangs that all did the same thing
-  * Many sites had separate bangs for their .com, .org, .net domains — all redirecting to the same place
-  * This redundancy makes the system harder to use and unnecessarily bloated
-  
-* **Intelligent organization** - Reduced database size by ~49% without losing functionality:
-  * Proper aliasing of identical destinations
-  * Binary search optimization for instant results
-  * Consolidated URLs with the same destination, while keeping the aliasing
+Visit [rebang.online](https://rebang.online) and search from there.
 
-* **Why hasn't DuckDuckGo done this?** - Despite promoting bangs as a key feature for over a decade, DuckDuckGo has neglected basic maintenance of their bang database. **!ReBang** steps in to provide what users deserve: a clean, fast, and reliable bang system.
+## How Custom Bangs Work
 
-## How to Use
+Custom bangs let you add shortcuts to any site. Example:
 
-1. **As a Custom Search Engine:**
-   - Go to https://rebang.online/ to configure **!ReBang** to your preferences. (Default Search)
-   - Add the URL `https://rebang.online/?q=%s` to your browser's custom search engines
-   - Set **!ReBang** as your default search engine.
-   - Type your search, include a bang `!g` `!yt` `!w` somewhere in the search, and **!ReBang** will reroute your request to where you want to search.
-   - **Create custom bangs** by clicking the "My Bangs" button on the homepage!
+| Trigger | Name | URL Pattern |
+|---------|------|-------------|
+| `jira` | Jira Search | `https://mycompany.atlassian.net/browse/%s` |
+| `docs` | Internal Docs | `https://docs.internal.com/search?q=%s` |
+| `npm` | NPM Packages | `https://www.npmjs.com/search?q=%s` |
 
-2. **Direct Use:** 
-   - Visit the website directly https://rebang.online/
-   - Use the search bar to enter your bang commands
-   - Get redirected instantly to your destination
-   - Access your **Custom Bangs** manager from the homepage
+The `%s` is replaced with your search query. Custom bangs take priority over built-in ones.
 
-## How to Create Custom Bangs
+## Development
 
-Creating your own bangs is simple:
+```bash
+# Install dependencies
+pnpm install
 
-1. Click the **"My Bangs"** button on the homepage
-2. Click **"Add Custom Bang"** in the manager
-3. Enter your bang's:
-   - **Trigger** (e.g., `maps` for `!maps`)
-   - **Service Name** (e.g., "Google Maps")
-   - **URL Pattern** (e.g., `https://www.google.com/maps/search/{{{s}}}`)
-4. Click **Save** and start using your custom bang immediately!
+# Start dev server
+pnpm dev
 
-Your custom bangs work just like official ones and will override any official bangs with the same trigger.
+# Update bangs from sources
+pnpm run update-bangs
 
-## How **!ReBang** Improves on DuckDuckGo and unduck
+# Build for production
+pnpm build
+```
 
-| Feature | DuckDuckGo | unduck | **!ReBang** |
-|---------|------------|--------|---------|
-| **Custom Bangs** | ❌ | ❌ | ✅ |
-| Fast Redirects | ❌ (Server-side) | ✅ (Client-side) | ✅ (Client-side) |
-| Modern UI | ✅ | ❌ | ✅ |
-| Bang Autocomplete | ✅ | ❌ | ✅ |
-| AI-focused Bangs | ❌ | T3 Only | ✅ |
-| Maintained Bang List | Partially | ❌ | ✅ |
-| No White Flash for Dark Mode Users | ❓ | ✅ | ✅ |
-| Curated, Working Bangs | ❌ | ❌ | ✅ |
-| Optimized & Deduplicated | ❌ | ❌ | ✅ |
+## Privacy
 
-## Why **!ReBang**?
+ReBang runs entirely in your browser. No searches are logged or tracked. Custom bangs and settings are stored in your browser's localStorage.
 
-* **Customization**: Create your own personal collection of bangs for sites you use most
-* **Speed**: Redirects happen instantly on your device without server latency
-* **Discovery**: Find useful new bangs you never knew existed
-* **Reliability**: Dead links are regularly pruned from our bang collection
-* **Privacy**: Your searches stay on your device - we don't track anything
-* **Modern**: Sleek and Simple.
-* **Quality**: Every bang in our database is verified to work properly
-* **Dark Mode Friendly**: Fixed the white flash issue during redirects that affected dark mode users in unduck
-* **Community-driven**: Actively maintained and improved based on user feedback
+## Credits
+
+- Inspired by and forked from [unduck](https://github.com/t3dotgg/unduck) by Theo
+- Bang data from [DuckDuckGo](https://duckduckgo.com/bang) and [Kagi](https://github.com/kagisearch/bangs)
+
+## License
+
+MIT

@@ -21,12 +21,13 @@ interface SettingsModalProps {
 }
 
 // Popular default bang options for quick selection
+// Using primary triggers from the database
 const POPULAR_DEFAULTS = [
   { trigger: "g", name: "Google", icon: "🔍" },
-  { trigger: "ddg", name: "DuckDuckGo", icon: "🦆" },
+  { trigger: "?", name: "DuckDuckGo", icon: "🦆" },
   { trigger: "b", name: "Bing", icon: "🅱️" },
-  { trigger: "sp", name: "Startpage", icon: "🔒" },
-  { trigger: "br", name: "Brave Search", icon: "🦁" },
+  { trigger: "s", name: "StartPage", icon: "🔒" },
+  { trigger: "brave", name: "Brave Search", icon: "🦁" },
 ];
 
 export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
