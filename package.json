@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "update-bangs": "node scripts/update-bangs.js && node scripts/split-bangs.js",
+    "update-bangs:fetch": "node scripts/update-bangs.js",
+    "update-bangs:split": "node scripts/split-bangs.js"
   },
   "devDependencies": {
     "@types/node": "^22.13.9",

@@ -1,0 +1,92 @@
+name: Update Bang List
+
+on:
+  # Run at 00:00 UTC on the 1st of every month
+  schedule:
+    - cron: '0 0 1 * *'
+  
+  # Allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
+
+jobs:
+  update-bangs:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Update bangs from DuckDuckGo and Kagi
+        run: node scripts/update-bangs.js
+      
+      - name: Process and split bangs
+        run: node scripts/split-bangs.js
+      
+      - name: Build to verify changes
+        run: npm run build
+      
+      - name: Check for changes
+        id: git-check
+        run: |
+          git diff --quiet src/bang.ts src/bangs-top.ts public/ || echo "changes=true" >> $GITHUB_OUTPUT
+      
+      - name: Create Pull Request
+        if: steps.git-check.outputs.changes == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update bang list from DuckDuckGo and Kagi"
+          title: "🔄 Monthly Bang List Update"
+          body: |
+            ## Automated Bang List Update
+            
+            This PR was automatically generated on the 1st of the month.
+            
+            ### Changes
+            - Fetched latest bangs from DuckDuckGo
+            - Fetched latest bangs from Kagi
+            - Merged and deduplicated entries
+            - Updated content hash for cache invalidation
+            
+            ### Files Changed
+            - `src/bang.ts` - Updated `BANGS_FILENAME` with new hash
+            - `src/bangs-top.ts` - Updated top bangs for inline bundling
+            - `public/bangs.*.json` - New bang database
+            
+            ---
+            *Please review the changes and merge if everything looks good.*
+          branch: chore/update-bangs
+          delete-branch: true
+          labels: |
+            automated
+            dependencies
+      
+      - name: Summary
+        if: steps.git-check.outputs.changes == 'true'
+        run: |
+          echo "## Bang Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Successfully updated bang list" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "A pull request has been created with the changes." >> $GITHUB_STEP_SUMMARY
+      
+      - name: No changes
+        if: steps.git-check.outputs.changes != 'true'
+        run: |
+          echo "## Bang Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "ℹ️ No changes detected in bang list" >> $GITHUB_STEP_SUMMARY
+

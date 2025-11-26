@@ -66,8 +66,9 @@ async function getRedirect(urlParams: URLSearchParams): Promise<BangRedirectResu
     }
 
     // Format the search URL, replacing template parameters
+    // Supports %s (our format), {{{s}}} (DDG legacy), and {searchTerms} (OpenSearch)
     const searchUrl = selectedBang.u.replace(
-      /{{{s}}}|{searchTerms}/g,
+      /%s|\{\{\{s\}\}\}|\{searchTerms\}/g,
       encodeURIComponent(cleanQuery)
     );
     

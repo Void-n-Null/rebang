@@ -11,6 +11,29 @@ let allBangs = defaultBangs; // Starts with Top 500
 let isFullLoaded = false;
 let loadPromise: Promise<void> | null = null;
 
+/**
+ * Compact format types
+ */
+type CompactBang = [string | string[], string, number, number, string];
+interface CompactBangData {
+  c: string[];
+  b: CompactBang[];
+}
+
+/**
+ * Parse compact format into BangItem objects
+ */
+function parseCompactBangs(data: CompactBangData): BangItem[] {
+  const { c: categories, b: bangs } = data;
+  return bangs.map(([t, s, catIdx, r, u]) => ({
+    t,
+    s,
+    c: catIdx >= 0 ? categories[catIdx] : undefined,
+    r,
+    u
+  }));
+}
+
 async function ensureFullLoaded() {
   if (isFullLoaded) return;
   if (loadPromise) return loadPromise;
@@ -21,7 +44,14 @@ async function ensureFullLoaded() {
       const res = await fetch(BANGS_FILENAME);
       if (!res.ok) throw new Error('Failed to fetch bangs');
       const data = await res.json();
-      allBangs = data;
+      
+      // Parse compact format if detected
+      if (data.c && data.b) {
+        allBangs = parseCompactBangs(data);
+      } else {
+        allBangs = data;
+      }
+      
       isFullLoaded = true;
       // Clear cache as we have new data
       workerCache.clear();

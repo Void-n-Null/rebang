@@ -175,8 +175,8 @@ function binarySearchBangPrefix(bangs: BangItem[], prefix: string): number {
     
     // Add category matches first (they have highest priority)
     categoryMatchBangs.forEach(bang => {
-      // Use domain and service as a unique identifier
-      const key = `${bang.d}:${bang.s}`;
+      // Use domain and service as a unique identifier (fallback to URL if no domain)
+      const key = `${bang.d || bang.u}:${bang.s}`;
       if (!combinedMap.has(key)) {
         combinedMap.set(key, bang);
       }
@@ -184,7 +184,7 @@ function binarySearchBangPrefix(bangs: BangItem[], prefix: string): number {
     
     // Then add sorted matches, but only if not already added by category
     sortedMatches.forEach(bang => {
-      const key = `${bang.d}:${bang.s}`;
+      const key = `${bang.d || bang.u}:${bang.s}`;
       if (!combinedMap.has(key)) {
         combinedMap.set(key, bang);
       }
