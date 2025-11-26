@@ -2,5 +2,16 @@
   "version": 2,
   "installCommand": "pnpm install --no-frozen-lockfile",
   "buildCommand": "tsc --noEmit && vite build",
-  "framework": "vite"
+  "framework": "vite",
+  "headers": [
+    {
+      "source": "/bangs.:hash.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
 } 

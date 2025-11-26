@@ -1,5 +1,5 @@
 import { BangItem } from "../types/BangItem";
-import { bangs as defaultBangs } from "../bang";
+import { bangs as defaultBangs, BANGS_FILENAME } from "../bang";
 import { MAX_FILTERED_ITEMS, filterAndSortBangs as utilFilterAndSortBangs, combineBangs } from "../utils/bangSearchUtil";
 
 // Cache mechanism within the worker
@@ -17,8 +17,9 @@ async function ensureFullLoaded() {
 
   loadPromise = (async () => {
     try {
-      const res = await fetch('/bangs.json');
-      if (!res.ok) throw new Error('Failed to fetch bangs.json');
+      // Use the content-hashed filename for proper cache invalidation
+      const res = await fetch(BANGS_FILENAME);
+      if (!res.ok) throw new Error('Failed to fetch bangs');
       const data = await res.json();
       allBangs = data;
       isFullLoaded = true;

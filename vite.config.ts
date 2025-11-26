@@ -30,6 +30,22 @@ export default defineConfig({
           }
         ]
         */
+      },
+      // Runtime caching for bangs.[hash].json - cache forever since filename changes on update
+      workbox: {
+        runtimeCaching: [
+          {
+            urlPattern: /\/bangs\.[a-f0-9]+\.json$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'bangs-cache',
+              expiration: {
+                maxEntries: 2, // Keep current + 1 old version
+                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+              }
+            }
+          }
+        ]
       }
     }),
   ],
