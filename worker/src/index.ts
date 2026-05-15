@@ -39,8 +39,10 @@ export default {
       return passToOrigin(request);
     }
 
-    // Extract bang from query (e.g., "cats !yt" -> "yt")
-    const bangMatch = query.match(/!(\S+)/i);
+    // Extract bang from query (e.g., "cats !yt" -> "yt").
+    // Require start-of-string or whitespace before `!` so tokens like
+    // "Wacatac.B!ml" don't accidentally trigger a bang. (GH #27)
+    const bangMatch = query.match(/(?:^|\s)!(\S+)/i);
     
     // No bang in query - pass to origin so client can use user's configured default
     if (!bangMatch) {
@@ -58,15 +60,25 @@ export default {
       return passToOrigin(request);
     }
 
-    // Remove bang from query to get clean search term
-    const cleanQuery = query.replace(/!\S+\s*/i, '').trim();
-    
-    // If no search term and just a bang, some bangs should go to homepage
-    // For now, use empty string which most search engines handle fine
-    const searchTerm = cleanQuery || '';
+    // Remove bang from query to get clean search term. Lookbehind so the
+    // leading whitespace before `!foo` is preserved (otherwise "cats !yt foo"
+    // would collapse to "catsfoo").
+    const cleanQuery = query.replace(/(?<=^|\s)!\S+\s*/i, '').trim();
+
+    // If just a bang and no search term, redirect to the site's base domain
+    // instead of producing an empty-results URL like
+    // `youtube.com/results?search_query=`. (GH #82, #90, #129, #56)
+    if (!cleanQuery) {
+      try {
+        const baseDomain = new URL(bang.u).origin;
+        return Response.redirect(baseDomain, 302);
+      } catch {
+        // Fall through to template substitution if the bang URL is malformed
+      }
+    }
 
     // Build the redirect URL
-    const redirectUrl = bang.u.replace(/%s/g, encodeURIComponent(searchTerm));
+    const redirectUrl = bang.u.replace(/%s/g, encodeURIComponent(cleanQuery));
 
     // Return 302 redirect
     return Response.redirect(redirectUrl, 302);

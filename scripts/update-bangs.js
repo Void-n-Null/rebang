@@ -35,6 +35,17 @@ const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 const OUTPUT_FILE = path.join(PUBLIC_DIR, 'bangs.json');
 
 /**
+ * Manual overrides for bangs whose upstream URL is known to be broken.
+ * Keyed by trigger. Applied after merge, before write.
+ *
+ * - rymgenre: upstream uses searchtype=g which 500s on RYM since their
+ *   2024 search overhaul; correct value is `h`. (GH #80)
+ */
+const URL_OVERRIDES = {
+  rymgenre: 'https://rateyourmusic.com/search?searchtype=h&searchterm=%s',
+};
+
+/**
  * Fetch JSON data from a URL
  */
 function fetchJson(url) {
@@ -408,6 +419,22 @@ async function main() {
   
   // Clean up null values
   const cleanedBangs = bangs.map(cleanBang);
+
+  // Apply manual URL overrides for known-broken upstream entries
+  let overrideCount = 0;
+  for (const bang of cleanedBangs) {
+    const triggers = Array.isArray(bang.t) ? bang.t : [bang.t];
+    for (const trigger of triggers) {
+      if (URL_OVERRIDES[trigger]) {
+        bang.u = URL_OVERRIDES[trigger];
+        overrideCount++;
+        break;
+      }
+    }
+  }
+  if (overrideCount > 0) {
+    console.log(`🩹 Applied ${overrideCount} manual URL override(s)`);
+  }
   
   // Generate stats
   const stats = generateStats(cleanedBangs);

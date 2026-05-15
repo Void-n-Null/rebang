@@ -127,7 +127,9 @@ return findBang(bangCandidate) ?? defaultBang;
 }
 
 export function determineBangCandidate(query: string, defaultBang: BangItem): string {
-const match = query.match(/!(\S+)/i);
+// Require start-of-string or whitespace before `!` so tokens like
+// "Wacatac.B!ml" don't accidentally trigger a bang. (GH #27)
+const match = query.match(/(?:^|\s)!(\S+)/i);
 const matchBangTrigger = match?.[1]?.toLowerCase();
 const defaultBangFirstTrigger = Array.isArray(defaultBang?.t) ? defaultBang?.t[0] : defaultBang?.t
 

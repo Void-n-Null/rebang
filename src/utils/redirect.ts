@@ -50,8 +50,12 @@ async function getRedirect(urlParams: URLSearchParams): Promise<BangRedirectResu
 
     const bangName = getBangFirstTrigger(selectedBang);
 
-    // Remove the first bang from the query
-    const cleanQuery = query.replace(/!\S+\s*/i, "").trim();
+    // Remove the first bang from the query. Use a lookbehind so we only
+    // strip `!foo` when it sits at the start of the string or after
+    // whitespace -- mid-token `!` like in "Wacatac.B!ml" must NOT be
+    // stripped, and the leading space (if any) must be preserved so
+    // surrounding terms don't get glued together. (GH #27)
+    const cleanQuery = query.replace(/(?<=^|\s)!\S+\s*/i, "").trim();
 
     //There used to be a check here for a specific setting that defaulted to true.
     //But I couldnt find a case where anyone would want it off, so I removed it.
