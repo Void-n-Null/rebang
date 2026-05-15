@@ -17,6 +17,40 @@ interface Env {
 const ORIGIN = 'https://www.rebang.online';
 
 /**
+ * Parse the `rebang_cb` cookie (set by the client in
+ * `src/utils/settings.ts::syncCustomBangsCookie`) into a Set of lowercase
+ * trigger strings the user has defined as custom bangs.
+ *
+ * The worker MUST defer to the origin/client for any trigger in this set --
+ * otherwise a user's custom `!gl` (e.g. a private GitLab) gets clobbered by
+ * the public top-bang of the same trigger at the edge. (GH #20)
+ */
+function getCustomBangTriggers(request: Request): Set<string> {
+  const cookieHeader = request.headers.get('cookie');
+  if (!cookieHeader) return new Set();
+
+  for (const part of cookieHeader.split(';')) {
+    const eq = part.indexOf('=');
+    if (eq === -1) continue;
+    const name = part.slice(0, eq).trim();
+    if (name !== 'rebang_cb') continue;
+    const raw = part.slice(eq + 1).trim();
+    if (!raw) return new Set();
+    try {
+      return new Set(
+        decodeURIComponent(raw)
+          .split(',')
+          .map(s => s.trim().toLowerCase())
+          .filter(Boolean)
+      );
+    } catch {
+      return new Set();
+    }
+  }
+  return new Set();
+}
+
+/**
  * Pass request through to Vercel origin
  */
 function passToOrigin(request: Request): Promise<Response> {
@@ -50,10 +84,17 @@ export default {
     }
     
     const bangTrigger = bangMatch[1].toLowerCase();
-    
+
+    // If the user has a custom bang with this trigger, defer to the origin
+    // so the React app can apply the override from localStorage. (GH #20)
+    const customTriggers = getCustomBangTriggers(request);
+    if (customTriggers.has(bangTrigger)) {
+      return passToOrigin(request);
+    }
+
     // Look up bang in our trigger map (O(1) lookup)
     const bang = triggerMap.get(bangTrigger);
-    
+
     if (!bang) {
       // Bang not found in top bangs - fall back to origin
       // This handles: uncommon bangs, custom user bangs, typos

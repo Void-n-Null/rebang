@@ -1,4 +1,5 @@
 import { performRedirect } from './utils/redirect';
+import { loadSettings } from './utils/settings';
 
 // FAST PATH: Check for redirect BEFORE loading React
 // This avoids loading the entire React app just to redirect
@@ -14,7 +15,12 @@ if (hasQuery) {
     // If redirected, the page will navigate away, no need to load React
   });
 } else {
-  // No query - load the full app for the homepage
+  // No query - homepage. Touch loadSettings on boot so any custom-bang
+  // triggers in localStorage get mirrored to the `rebang_cb` cookie that
+  // the edge worker reads (GH #20). Without this, users who configured
+  // custom bangs before the cookie sync shipped would stay broken until
+  // they next opened the Settings modal.
+  loadSettings();
   loadApp();
 }
 
